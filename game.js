@@ -121,9 +121,9 @@ content.innerHTML=`
 }
 
 if(s==="train"){
-let strengthCost = 20 * Math.pow(2, gameData.hero.strength);
-let enduranceCost = 20 * Math.pow(2, gameData.hero.endurance);
-let vitalityCost = 20 * Math.pow(2, gameData.hero.vitality);
+let strengthPrice = Math.floor(20 * Math.pow(1.1, gameData.hero.strength));
+let endurancePrice = Math.floor(20 * Math.pow(1.1, gameData.hero.endurance));
+let vitalityPrice = Math.floor(20 * Math.pow(1.1, gameData.hero.vitality));
 
 content.innerHTML=`
 <h2>Тренування</h2>
@@ -205,21 +205,20 @@ alert("Новий рівень! +100 золота і бонусний предм
 }
 
 function train(t){
-let price = 20 * Math.pow(2, gameData.hero[t]);
+    let price = Math.floor(20 * Math.pow(1.1, gameData.hero[t]));
 
-if(gameData.gold < price){
-alert("Недостатньо золота");
-return;
-}
+    if(gameData.gold < price){
+        alert("Недостатньо золота");
+        return;
+    }
 
-gameData.gold -= price;
-gameData.hero[t]++;
+    gameData.gold -= price;
+    gameData.hero[t]++;
 
-recalc();
-save();
-updateUI();
-show("train");
-updateRating();
+    recalc();
+    save();
+    updateUI();
+    show("train");
 }
 
 function equip(i){
