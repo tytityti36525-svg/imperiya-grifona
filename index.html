@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Імперія Грифона</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+<div id="mainMenu">
+<h1>🦅 Імперія Грифона</h1>
+<button onclick="showLogin()">Увійти</button>
+<button onclick="showRegister()">Реєстрація</button>
+</div>
+
+<div id="auth" style="display:none;"></div> 
+
+<div id="game" style="display:none;">
+
+<div id="topbar">
+💰 <span id="gold"></span>
+⚔️ <span id="power"></span>
+⭐ <span id="level"></span>
+</div>
+
+<div id="expBar">
+<div id="expFill">0%</div>
+</div>
+
+<div id="menu">
+<button onclick="show('hero')">🛡️ Герой</button>
+<button onclick="show('castle')">🏰 Замок</button>
+<button onclick="show('war')">⚔️ Війна</button>
+<button onclick="show('train')">🏋️ Тренування</button>
+<button onclick="show('inventory')">🎒 Сумка</button>
+<button onclick="show('army')">🏹 Армія</button>
+<button onclick="show('raid')">⚔️ Рейд</button>
+<button onclick="show('chat')">💬 Чат</button>
+</div>
+
+<div id="content"></div>
+
+<button onclick="logout()">🚪 Вийти</button>
+
+</div>
+
+</div>
+
+<script src="auth.js"></script>
+<script src="game.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "ТВОЙ_API_KEY",
+  authDomain: "imperiya-grifona.firebaseapp.com",
+  projectId: "imperiya-grifona",
+  storageBucket: "imperiya-grifona.appspot.com",
+  messagingSenderId: "952468135190",
+  appId: "1:952468135190:web:cf402029c50911a0f08437"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+
+</body>
+</html>
