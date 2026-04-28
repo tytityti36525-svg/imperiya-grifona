@@ -87,8 +87,8 @@ if(s==="hero"){
 content.innerHTML=`
 <h2>Герой</h2>
 <div style="font-size:120px;">🧙‍♂️</div>
-Сила: ${gameData.hero.attack}<br>
-Рівень: ${gameData.hero.level}<br><br>
+Сила:${gameData.hero.attack}<br>
+Рівень:${gameData.hero.level}<br><br>
 🪖 ${fmt(gameData.equipped.helmet)}<br>
 🛡️ ${fmt(gameData.equipped.armor)}<br>
 👖 ${fmt(gameData.equipped.pants)}<br>
@@ -98,33 +98,47 @@ content.innerHTML=`
 }
 
 if(s==="castle"){
+let price = 100 * Math.pow(2, gameData.castleLevel - 1);
+
 content.innerHTML=`
 <h2>Замок</h2>
 <div style="font-size:100px;">🏰</div>
-Рівень: ${gameData.castleLevel}<br>
-<button onclick="upgradeCastle()">Покращити (100)</button>
+Рівень:${gameData.castleLevel}<br>
+Ціна покращення: ${price} золота<br>
+<button onclick="upgradeCastle()">Покращити</button>
 `;
 }
 
 if(s==="war"){
-let e=10+gameData.hero.level*3;
+let e = Math.floor(10 * Math.pow(1.15, gameData.hero.level - 1));
+
 content.innerHTML=`
 <h2>Бій</h2>
 <div style="font-size:90px;">😈</div>
-Сила ворога: ${e}<br>
+Сила ворога:${e}<br>
 <button onclick="fight(${e})">Бій</button>
 `;
 }
 
 if(s==="train"){
+let strengthCost = 20 * Math.pow(2, gameData.hero.strength);
+let enduranceCost = 20 * Math.pow(2, gameData.hero.endurance);
+let vitalityCost = 20 * Math.pow(2, gameData.hero.vitality);
+
 content.innerHTML=`
 <h2>Тренування</h2>
-💪 Сила: ${gameData.hero.strength}
-<button onclick="train('strength')">+2 атаки (20)</button><br>
-🛡️ Витривалість: ${gameData.hero.endurance}
-<button onclick="train('endurance')">+1 атака (20)</button><br>
-❤️ Живучість: ${gameData.hero.vitality}
-<button onclick="train('vitality')">+1 атака (20)</button>
+
+💪 Сила: ${gameData.hero.strength}<br>
+Ціна: ${strengthCost} золота
+<button onclick="train('strength')">+2 атаки</button><br><br>
+
+🛡️ Витривалість: ${gameData.hero.endurance}<br>
+Ціна: ${enduranceCost} золота
+<button onclick="train('endurance')">+1 атака</button><br><br>
+
+❤️ Живучість: ${gameData.hero.vitality}<br>
+Ціна: ${vitalityCost} золота
+<button onclick="train('vitality')">+1 атака</button>
 `;
 }
 
@@ -139,39 +153,28 @@ ${i.icon} ${i.name} (+${i.power})
 if(s==="army"){
 content.innerHTML=`
 <h2>Армія</h2>
-<div style="font-size:90px;">🛡️🧍‍♂️🧍‍♂️🧍‍♂️</div>
+<div style="font-size:90px;">🛡️⚔️🧍‍♂️⚔️🛡️</div>
 Солдати: ${gameData.army}<br>
-Кожен солдат дає +1 до сили.<br>
+Кожен солдат дає +1 сили<br>
 <button onclick="hireArmy()">Найняти солдата (30)</button>
 `;
 }
 
 if(s==="raid"){
-
-let r = generateRaidEnemy();
-
 content.innerHTML=`
-<h2>⚔️ Рейд</h2>
-
-<div style="font-size:90px;">${r.icon}</div>
-
-Ворог: ${r.name}<br>
-Сила ворога: ${r.power}<br>
-Потрібно солдатів: ${r.army}<br>
-Нагорода: ${r.reward} золота<br><br>
-
-Твоя сила: ${gameData.hero.attack}<br>
-Твоя армія: ${gameData.army}<br><br>
-
-<button onclick="startRaid(${r.power}, ${r.army}, ${r.reward})">Напасти</button>
+<h2>Рейд</h2>
+<div style="font-size:90px;">🏰⚔️🛡️</div>
+Потрібно 50 сили і 5 солдатів<br>
+<button onclick="raid()">Йти</button>
 `;
 }
 
-if(s==="chat"){
-loadChat();
+if(s==="chat") loadChat();
+
+if(s==="rating") showRating();
 }
 
-}
+
 
 function fight(e){
 if(gameData.hero.attack>e){
@@ -187,6 +190,7 @@ checkLevelUp();
 recalc();
 save();
 updateUI();
+updateRating();
 }
 
 function checkLevelUp(){
@@ -201,18 +205,21 @@ alert("Новий рівень! +100 золота і бонусний предм
 }
 
 function train(t){
-if(gameData.gold<20){
+let price = 20 * Math.pow(2, gameData.hero[t]);
+
+if(gameData.gold < price){
 alert("Недостатньо золота");
 return;
 }
 
-gameData.gold-=20;
+gameData.gold -= price;
 gameData.hero[t]++;
 
 recalc();
 save();
 updateUI();
 show("train");
+updateRating();
 }
 
 function equip(i){
@@ -285,17 +292,20 @@ show("raid");
 }
 
 function upgradeCastle(){
-if(gameData.gold<100){
+let price = 100 * Math.pow(2, gameData.castleLevel - 1);
+
+if(gameData.gold < price){
 alert("Недостатньо золота");
 return;
 }
 
-gameData.gold-=100;
+gameData.gold -= price;
 gameData.castleLevel++;
 
 save();
 updateUI();
 show("castle");
+updateRating();
 }
 
 function fmt(i){
@@ -380,4 +390,39 @@ power: Math.floor(Math.random()*(t.maxPower - t.minPower)+t.minPower),
 army:t.minArmy,
 reward:t.reward
 };
+}
+function updateRating(){
+let rating = JSON.parse(localStorage.getItem("rating")) || [];
+
+let existing = rating.find(r => r.login === user.login);
+
+if(existing){
+existing.nick = user.nick || user.login;
+existing.level = gameData.hero.level;
+} else {
+rating.push({
+login: user.login,
+nick: user.nick || user.login,
+level: gameData.hero.level
+});
+}
+
+localStorage.setItem("rating", JSON.stringify(rating));
+}
+
+function showRating(){
+updateRating();
+
+let rating = JSON.parse(localStorage.getItem("rating")) || [];
+
+rating.sort((a,b) => b.level - a.level);
+
+content.innerHTML = `
+<h2>🏆 Рейтинг гравців</h2>
+${rating.map((r,i)=>`
+<div>
+${i+1}. ${r.nick} — рівень ${r.level}
+</div>
+`).join("")}
+`;
 }
