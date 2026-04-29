@@ -408,19 +408,19 @@ function show(section) {
 
             <h3>Будівлі</h3>
 
-            <div style="font-size:70px;">🏹</div>
+            <img src="images/barracks.png" class="building-img">
             <b>Казарма:</b> ${gameData.buildings.barracks}<br>
             Відкриває лучників і лицарів<br>
             Ціна: ${buildingPrice("barracks")} золота<br>
             <button onclick="upgradeBuilding('barracks')">Покращити казарму</button><br><br>
 
-            <div style="font-size:70px;">⚒️</div>
+            <img src="images/barracks.png" class="building-img">
             <b>Кузня:</b> ${gameData.buildings.forge}<br>
             Дає +2 сили за рівень<br>
             Ціна: ${buildingPrice("forge")} золота<br>
             <button onclick="upgradeBuilding('forge')">Покращити кузню</button><br><br>
 
-            <div style="font-size:70px;">📚</div>
+            <img src="images/academy.png" class="building-img">
             <b>Академія:</b> ${gameData.buildings.academy}<br>
             Будівля розвитку героя<br>
             Ціна: ${buildingPrice("academy")} золота<br>

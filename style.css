@@ -95,3 +95,9 @@ input {
     object-fit: contain;
     margin: 10px 0;
 }
+
+.building-img {
+    width: 120px;
+    max-width: 100%;
+    margin: 10px 0;
+}
