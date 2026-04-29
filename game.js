@@ -112,6 +112,16 @@ function fixOldSaves() {
     if (gameData.equipped.boots === undefined) gameData.equipped.boots = null;
     if (gameData.equipped.weapon === undefined) gameData.equipped.weapon = null;
     if (gameData.hero.heroClass === undefined) gameData.hero.heroClass = "mage";
+
+    if (!gameData.equipmentPower) {
+    gameData.equipmentPower = {
+        helmet: gameData.equipped?.helmet?.power || 0,
+        armor: gameData.equipped?.armor?.power || 0,
+        pants: gameData.equipped?.pants?.power || 0,
+        boots: gameData.equipped?.boots?.power || 0,
+        weapon: gameData.equipped?.weapon?.power || 0
+    };
+}
 }
 
 async function save() {
@@ -658,7 +668,26 @@ async function buyShopItem(type) {
 async function equip(index) {
     const item = gameData.inventory[index];
 
-    gameData.equipped[item.type] = item;
+    if (!gameData.equipmentPower) {
+        gameData.equipmentPower = {
+            helmet: 0,
+            armor: 0,
+            pants: 0,
+            boots: 0,
+            weapon: 0
+        };
+    }
+
+    gameData.equipmentPower[item.type] += item.power;
+
+    gameData.equipped[item.type] = {
+        name: item.name,
+        type: item.type,
+        icon: item.icon,
+        power: gameData.equipmentPower[item.type],
+        color: item.color
+    };
+
     gameData.inventory.splice(index, 1);
 
     recalc();
