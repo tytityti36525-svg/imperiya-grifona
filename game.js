@@ -1,4 +1,5 @@
 const gold = document.getElementById("gold");
+const diamonds = document.getElementById("diamonds");
 const power = document.getElementById("power");
 const level = document.getElementById("level");
 const content = document.getElementById("content");
@@ -8,6 +9,7 @@ let gameData;
 let playerId;
 let playerRef;
 let currentEnemy = null;
+let chatUnsubscribe = null;
 
 function defaultGame() {
     return {
@@ -21,6 +23,7 @@ function defaultGame() {
             attack: 10
         },
         gold: 500,
+        diamonds: 5,
         inventory: [],
         castleLevel: 1,
         buildings: {
@@ -54,7 +57,21 @@ async function startGame(uid) {
 
     fixOldSaves();
     recalc();
-    await save();
+
+    const emailLogin = authFirebase.currentUser?.email?.split("@")[0] || "player";
+
+    await playerRef.set({
+        uid: uid,
+        nick: data.nick || data.login || emailLogin,
+        login: data.login || emailLogin,
+        level: gameData.hero.level,
+        power: gameData.hero.attack,
+        gold: gameData.gold,
+        diamonds: gameData.diamonds,
+        game: gameData,
+        updatedAt: Date.now()
+    }, { merge: true });
+
     updateUI();
     show("hero");
 }
@@ -72,6 +89,7 @@ function fixOldSaves() {
     if (gameData.hero.attack === undefined) gameData.hero.attack = 10;
 
     if (gameData.gold === undefined) gameData.gold = 500;
+    if (gameData.diamonds === undefined) gameData.diamonds = 5;
     if (gameData.castleLevel === undefined) gameData.castleLevel = 1;
 
     if (!Array.isArray(gameData.inventory)) gameData.inventory = [];
@@ -81,10 +99,7 @@ function fixOldSaves() {
     if (gameData.buildings.forge === undefined) gameData.buildings.forge = 1;
     if (gameData.buildings.academy === undefined) gameData.buildings.academy = 1;
 
-    if (!gameData.army || typeof gameData.army === "number") {
-        gameData.army = def.army;
-    }
-
+    if (!gameData.army || typeof gameData.army === "number") gameData.army = def.army;
     if (gameData.army.swordsmen === undefined) gameData.army.swordsmen = 0;
     if (gameData.army.archers === undefined) gameData.army.archers = 0;
     if (gameData.army.knights === undefined) gameData.army.knights = 0;
@@ -100,11 +115,19 @@ function fixOldSaves() {
 async function save() {
     if (!playerRef) return;
 
+    const snap = await playerRef.get();
+    const old = snap.data() || {};
+    const emailLogin = authFirebase.currentUser?.email?.split("@")[0] || "player";
+
     await playerRef.set({
+        uid: playerId,
+        nick: old.nick || old.login || emailLogin,
+        login: old.login || emailLogin,
         game: gameData,
         level: gameData.hero.level,
         power: gameData.hero.attack,
         gold: gameData.gold,
+        diamonds: gameData.diamonds,
         updatedAt: Date.now()
     }, { merge: true });
 }
@@ -123,9 +146,7 @@ function recalc() {
     atk += (gameData.buildings.forge - 1) * 2;
 
     for (let key in gameData.equipped) {
-        if (gameData.equipped[key]) {
-            atk += gameData.equipped[key].power;
-        }
+        if (gameData.equipped[key]) atk += gameData.equipped[key].power;
     }
 
     gameData.hero.attack = atk;
@@ -133,6 +154,7 @@ function recalc() {
 
 function updateUI() {
     gold.innerText = gameData.gold;
+    if (diamonds) diamonds.innerText = gameData.diamonds;
     power.innerText = gameData.hero.attack;
     level.innerText = gameData.hero.level;
 
@@ -143,6 +165,12 @@ function updateUI() {
 
 function castlePrice() {
     return 100 * Math.pow(2, gameData.castleLevel - 1);
+}
+
+function canUpgradeCastle() {
+    return gameData.buildings.barracks >= gameData.castleLevel &&
+           gameData.buildings.forge >= gameData.castleLevel &&
+           gameData.buildings.academy >= gameData.castleLevel;
 }
 
 function buildingPrice(type) {
@@ -159,14 +187,18 @@ function trainPrice(type) {
     return Math.floor(20 * Math.pow(1.1, gameData.hero[type]));
 }
 
+function totalArmy() {
+    return gameData.army.swordsmen + gameData.army.archers + gameData.army.knights;
+}
+
 function armyPower() {
     return gameData.army.swordsmen * 1 +
            gameData.army.archers * 2 +
            gameData.army.knights * 5;
 }
 
-function getRarity() {
-    let lvl = gameData.hero.level;
+function getDropRarity() {
+    const lvl = gameData.hero.level;
 
     if (lvl >= 30) return { name: "Міфічний", color: "red", min: 15, max: 20 };
     if (lvl >= 25) return { name: "Легендарний", color: "gold", min: 12, max: 15 };
@@ -178,9 +210,27 @@ function getRarity() {
     return { name: "Звичайний", color: "white", min: 2, max: 3 };
 }
 
-function getItem() {
-    const rarity = getRarity();
+function getShopRarity() {
+    const lvl = gameData.hero.level;
 
+    if (lvl >= 15) return { name: "Легендарний", color: "gold", min: 12, max: 15 };
+    if (lvl >= 10) return { name: "Епічний", color: "orange", min: 9, max: 12 };
+    if (lvl >= 5) return { name: "Особливий", color: "violet", min: 7, max: 9 };
+
+    return { name: "Рідкісний", color: "deepskyblue", min: 5, max: 7 };
+}
+
+function shopPrice() {
+    const lvl = gameData.hero.level;
+
+    if (lvl >= 15) return 10;
+    if (lvl >= 10) return 7;
+    if (lvl >= 5) return 5;
+
+    return 3;
+}
+
+function makeItem(rarity, forcedType = null) {
     const items = [
         { name: "Шолом", type: "helmet", icon: "🪖" },
         { name: "Броня", type: "armor", icon: "🛡️" },
@@ -189,7 +239,10 @@ function getItem() {
         { name: "Меч", type: "weapon", icon: "⚔️" }
     ];
 
-    const base = items[Math.floor(Math.random() * items.length)];
+    const base = forcedType
+        ? items.find(i => i.type === forcedType)
+        : items[Math.floor(Math.random() * items.length)];
+
     const itemPower = Math.floor(Math.random() * (rarity.max - rarity.min + 1)) + rarity.min;
 
     return {
@@ -199,6 +252,10 @@ function getItem() {
         power: itemPower,
         color: rarity.color
     };
+}
+
+function getItem() {
+    return makeItem(getDropRarity());
 }
 
 function generateEnemy() {
@@ -242,6 +299,11 @@ function generateRaidEnemy() {
 }
 
 function show(section) {
+    if (section !== "chat" && chatUnsubscribe) {
+        chatUnsubscribe();
+        chatUnsubscribe = null;
+    }
+
     if (section === "hero") {
         content.innerHTML = `
             <h2>Герой</h2>
@@ -261,25 +323,32 @@ function show(section) {
     if (section === "castle") {
         content.innerHTML = `
             <h2>Замок</h2>
-            <div style="font-size:100px;">🏰</div>
+            <div style="font-size:110px;">🏰</div>
             Рівень замку: ${gameData.castleLevel}<br>
             Ціна покращення: ${castlePrice()} золота<br>
-            <button onclick="upgradeCastle()">Покращити замок</button>
+            ${
+                canUpgradeCastle()
+                ? `<button onclick="upgradeCastle()">Покращити замок</button>`
+                : `<p style="color:#ff7777;">Щоб покращити замок, прокачай усі будівлі до ${gameData.castleLevel} рівня.</p>`
+            }
 
             <h3>Будівлі</h3>
 
-            🏹 Казарма: ${gameData.buildings.barracks}<br>
-            Відкриває сильніші війська<br>
+            <div style="font-size:70px;">🏹</div>
+            <b>Казарма:</b> ${gameData.buildings.barracks}<br>
+            Відкриває лучників і лицарів<br>
             Ціна: ${buildingPrice("barracks")} золота<br>
             <button onclick="upgradeBuilding('barracks')">Покращити казарму</button><br><br>
 
-            ⚒️ Кузня: ${gameData.buildings.forge}<br>
+            <div style="font-size:70px;">⚒️</div>
+            <b>Кузня:</b> ${gameData.buildings.forge}<br>
             Дає +2 сили за рівень<br>
             Ціна: ${buildingPrice("forge")} золота<br>
             <button onclick="upgradeBuilding('forge')">Покращити кузню</button><br><br>
 
-            📚 Академія: ${gameData.buildings.academy}<br>
-            Розвиток героя<br>
+            <div style="font-size:70px;">📚</div>
+            <b>Академія:</b> ${gameData.buildings.academy}<br>
+            Будівля розвитку героя<br>
             Ціна: ${buildingPrice("academy")} золота<br>
             <button onclick="upgradeBuilding('academy')">Покращити академію</button>
         `;
@@ -376,12 +445,35 @@ function show(section) {
         `;
     }
 
+    if (section === "shop") {
+        const r = getShopRarity();
+        const price = shopPrice();
+
+        content.innerHTML = `
+            <h2>💎 Магазин</h2>
+            Алмази: ${gameData.diamonds}<br>
+            Предмети магазину: <span style="color:${r.color}">${r.name}</span><br>
+            Ціна за предмет: ${price} 💎<br><br>
+
+            <button onclick="buyShopItem('helmet')">🪖 Купити шолом</button>
+            <button onclick="buyShopItem('armor')">🛡️ Купити броню</button>
+            <button onclick="buyShopItem('pants')">👖 Купити штани</button>
+            <button onclick="buyShopItem('boots')">👢 Купити чоботи</button>
+            <button onclick="buyShopItem('weapon')">⚔️ Купити меч</button>
+        `;
+    }
+
     if (section === "pvp") loadPvP();
     if (section === "chat") loadChat();
     if (section === "rating") loadRating();
 }
 
 async function upgradeCastle() {
+    if (!canUpgradeCastle()) {
+        alert("Спочатку прокачай усі будівлі до рівня замку.");
+        return;
+    }
+
     const price = castlePrice();
 
     if (gameData.gold < price) {
@@ -439,9 +531,7 @@ async function fight() {
         gameData.gold += currentEnemy.reward;
         gameData.hero.exp += currentEnemy.exp;
 
-        if (Math.random() < 0.7) {
-            gameData.inventory.push(getItem());
-        }
+        if (Math.random() < 0.7) gameData.inventory.push(getItem());
 
         alert("Перемога!");
     } else {
@@ -459,11 +549,34 @@ function checkLevelUp() {
     while (gameData.hero.exp >= gameData.hero.expMax) {
         gameData.hero.exp -= gameData.hero.expMax;
         gameData.hero.level++;
+
+        const diamondsReward = gameData.hero.level * 2;
+
         gameData.hero.expMax = Math.floor(gameData.hero.expMax * 1.35);
         gameData.gold += 100;
+        gameData.diamonds += diamondsReward;
         gameData.inventory.push(getItem());
-        alert("Новий рівень! +100 золота і предмет.");
+
+        alert(`Новий рівень! +100 золота, +${diamondsReward} алмазів і предмет.`);
     }
+}
+
+async function buyShopItem(type) {
+    const price = shopPrice();
+
+    if (gameData.diamonds < price) {
+        alert("Недостатньо алмазів");
+        return;
+    }
+
+    gameData.diamonds -= price;
+    gameData.inventory.push(makeItem(getShopRarity(), type));
+
+    await save();
+    updateUI();
+    show("shop");
+
+    alert("Предмет куплено і додано в сумку.");
 }
 
 async function equip(index) {
@@ -509,10 +622,6 @@ async function hireArmy(type) {
     show("army");
 }
 
-function totalArmy() {
-    return gameData.army.swordsmen + gameData.army.archers + gameData.army.knights;
-}
-
 async function startRaid(enemyPower, enemyArmy, reward) {
     if (gameData.hero.attack < enemyPower || totalArmy() < enemyArmy) {
         alert("Недостатньо сили або армії");
@@ -522,9 +631,7 @@ async function startRaid(enemyPower, enemyArmy, reward) {
     gameData.gold += reward;
     gameData.hero.exp += 60;
 
-    if (Math.random() < 0.7) {
-        gameData.inventory.push(getItem());
-    }
+    if (Math.random() < 0.7) gameData.inventory.push(getItem());
 
     alert("Перемога в рейді!");
 
@@ -538,13 +645,15 @@ async function startRaid(enemyPower, enemyArmy, reward) {
 async function loadRating() {
     const snap = await db.collection("players")
         .orderBy("level", "desc")
-        .limit(20)
+        .limit(30)
         .get();
 
     let html = `<h2>🏆 Рейтинг</h2>`;
 
     snap.forEach(doc => {
         const p = doc.data();
+        if (!p.nick && !p.login) return;
+
         html += `<div>${p.nick || p.login} — рівень ${p.level || 1}, сила ${p.power || 10}</div>`;
     });
 
@@ -563,6 +672,7 @@ async function loadPvP() {
         if (doc.id === playerId) return;
 
         const p = doc.data();
+        if (!p.nick && !p.login) return;
 
         html += `
             <div>
@@ -580,9 +690,7 @@ async function attackPlayer(targetId, targetPower) {
         gameData.gold += 100;
         gameData.hero.exp += 40;
 
-        if (Math.random() < 0.5) {
-            gameData.inventory.push(getItem());
-        }
+        if (Math.random() < 0.5) gameData.inventory.push(getItem());
 
         alert("Перемога в PvP!");
     } else {
@@ -597,27 +705,29 @@ async function attackPlayer(targetId, targetPower) {
 }
 
 function loadChat() {
-    db.collection("chat")
+    content.innerHTML = `
+        <h2>💬 Чат</h2>
+        <div id="chatBox" style="height:220px;overflow:auto;background:#111;padding:10px;border-radius:10px;"></div>
+        <br>
+        <input id="msg" placeholder="Напиши повідомлення">
+        <button onclick="sendMessage()">Відправити</button>
+    `;
+
+    const chatBox = document.getElementById("chatBox");
+
+    chatUnsubscribe = db.collection("chat")
         .orderBy("time")
         .limit(50)
         .onSnapshot(snapshot => {
-            let html = `
-                <h2>💬 Чат</h2>
-                <div style="height:220px;overflow:auto;background:#111;padding:10px;border-radius:10px;">
-            `;
+            let html = "";
 
             snapshot.forEach(doc => {
                 const msg = doc.data();
-                html += `<div><b>${msg.user}</b>: ${msg.text}</div>`;
+                html += `<div><b>${msg.user || "Гравець"}</b>: ${msg.text}</div>`;
             });
 
-            html += `
-                </div><br>
-                <input id="msg" placeholder="Напиши повідомлення">
-                <button onclick="sendMessage()">Відправити</button>
-            `;
-
-            content.innerHTML = html;
+            chatBox.innerHTML = html;
+            chatBox.scrollTop = chatBox.scrollHeight;
         });
 }
 
@@ -628,10 +738,10 @@ async function sendMessage() {
     if (!text) return;
 
     const snap = await playerRef.get();
-    const player = snap.data();
+    const player = snap.data() || {};
 
     await db.collection("chat").add({
-        user: player.nick || player.login,
+        user: player.nick || player.login || "Гравець",
         text: text,
         time: Date.now()
     });
