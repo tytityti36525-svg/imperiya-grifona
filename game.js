@@ -37,6 +37,12 @@ function defaultGame() {
             archers: 0,
             knights: 0
         },
+        
+        armyHired: {
+    swordsmen: 0,
+    archers: 0,
+    knights: 0
+},
         equipped: {
     helmet: null,
     armor: null,
@@ -129,6 +135,22 @@ function fixOldSaves() {
         boots: gameData.equipped?.boots?.power || 0,
         weapon: gameData.equipped?.weapon?.power || 0
     };
+    if (!gameData.armyHired) {
+    gameData.armyHired = {
+        swordsmen: gameData.army?.swordsmen || 0,
+        archers: gameData.army?.archers || 0,
+        knights: gameData.army?.knights || 0
+    };
+}
+}
+function armyHirePrice(type) {
+    const base = {
+        swordsmen: 30,
+        archers: 80,
+        knights: 200
+    };
+
+    return Math.floor(base[type] * Math.pow(1.2, gameData.armyHired[type] || 0));
 }
 }
 
@@ -450,6 +472,43 @@ function show(section) {
                 `).join("")
             }
         `;
+        async function equipAll() {
+    if (!gameData.inventory || gameData.inventory.length === 0) {
+        alert("Сумка порожня");
+        return;
+    }
+
+    if (!gameData.equipmentPower) {
+        gameData.equipmentPower = {
+            helmet: 0,
+            armor: 0,
+            pants: 0,
+            boots: 0,
+            weapon: 0
+        };
+    }
+
+    gameData.inventory.forEach(item => {
+        gameData.equipmentPower[item.type] += item.power;
+
+        gameData.equipped[item.type] = {
+            name: item.name,
+            type: item.type,
+            icon: item.icon,
+            power: gameData.equipmentPower[item.type],
+            color: item.color
+        };
+    });
+
+    gameData.inventory = [];
+
+    recalc();
+    await save();
+    updateUI();
+    show("hero");
+
+    alert("Усе одягнуто!");
+}
     }
 
     if (section === "army") {
@@ -458,17 +517,17 @@ function show(section) {
             <div style="font-size:90px;">🛡️⚔️🧍‍♂️🏹🐎</div>
 
             ⚔️ Мечники: ${gameData.army.swordsmen}<br>
-            +1 сила, ціна 30<br>
+            +1 сила, ціна ${armyHirePrice("swordsmen")}<br>
             <button onclick="hireArmy('swordsmen')">Найняти мечника</button><br><br>
 
             🏹 Лучники: ${gameData.army.archers}<br>
-            +2 сила, ціна 80<br>
+            +2 сила, ціна ${armyHirePrice("archers")}<br>
             ${gameData.buildings.barracks >= 2
                 ? `<button onclick="hireArmy('archers')">Найняти лучника</button>`
                 : "Потрібна казарма 2 рівня"}<br><br>
 
             🐎 Лицарі: ${gameData.army.knights}<br>
-            +5 сила, ціна 200<br>
+            +5 сила, ціна ${armyHirePrice("knights")}<br>
             ${gameData.buildings.barracks >= 3
                 ? `<button onclick="hireArmy('knights')">Найняти лицаря</button>`
                 : "Потрібна казарма 3 рівня"}<br><br>
@@ -709,12 +768,6 @@ async function equip(index) {
 }
 
 async function hireArmy(type) {
-    const costs = {
-        swordsmen: 30,
-        archers: 80,
-        knights: 200
-    };
-
     if (type === "archers" && gameData.buildings.barracks < 2) {
         alert("Потрібна казарма 2 рівня");
         return;
@@ -725,13 +778,16 @@ async function hireArmy(type) {
         return;
     }
 
-    if (gameData.gold < costs[type]) {
+    const price = armyHirePrice(type);
+
+    if (gameData.gold < price) {
         alert("Недостатньо золота");
         return;
     }
 
-    gameData.gold -= costs[type];
+    gameData.gold -= price;
     gameData.army[type]++;
+    gameData.armyHired[type]++;
 
     recalc();
     await save();
