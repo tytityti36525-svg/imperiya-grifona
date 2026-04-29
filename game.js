@@ -13,6 +13,7 @@ let chatUnsubscribe = null;
 
 function defaultGame() {
     return {
+        version: 2,
         hero: {
             level: 1,
             exp: 0,
@@ -69,6 +70,17 @@ async function startGame(uid) {
     const data = snap.data() || {};
 
     gameData = data.game || defaultGame();
+    // 🔥 ВЕРСІЯ ГРИ (міняєш — і всім скидає)
+const GAME_VERSION = 2;
+
+if (!gameData.version || gameData.version < GAME_VERSION) {
+    gameData = defaultGame();   // повний ресет
+    gameData.version = GAME_VERSION;
+
+    await playerRef.set({ game: gameData }, { merge: true });
+
+    alert("Гру оновлено! Прогрес скинуто.");
+}
 
     fixOldSaves();
     recalc();
