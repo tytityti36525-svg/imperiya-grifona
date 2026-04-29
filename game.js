@@ -315,7 +315,10 @@ function makeItem(rarity, forcedType = null) {
 }
 
 function getItem() {
-    return makeItem(getDropRarity());
+    if (Math.random() < 0.05) { // 5% шанс
+        return makeItem(getDropRarity());
+    }
+    return null;
 }
 
 function generateEnemy() {
@@ -667,7 +670,10 @@ async function fight() {
         gameData.gold += currentEnemy.reward;
         gameData.hero.exp += currentEnemy.exp;
 
-        if (Math.random() < 0.7) gameData.inventory.push(getItem());
+        if (Math.random() < 0.7) const item = getItem();
+if (item) {
+    gameData.inventory.push(item);
+}
 
         alert("Перемога!");
     } else {
@@ -691,7 +697,10 @@ function checkLevelUp() {
         gameData.hero.expMax = Math.floor(gameData.hero.expMax * 1.35);
         gameData.gold += 100;
         gameData.diamonds += diamondsReward;
-        gameData.inventory.push(getItem());
+        const item = getItem();
+if (item) {
+    gameData.inventory.push(item);
+}
 
         alert(`Новий рівень! +100 золота, +${diamondsReward} алмазів і предмет.`);
     }
@@ -802,7 +811,10 @@ async function startRaid(enemyPower, enemyArmy, reward) {
     gameData.gold += reward;
     gameData.hero.exp += 60;
 
-    if (Math.random() < 0.7) gameData.inventory.push(getItem());
+    if (Math.random() < 0.7) const item = getItem();
+if (item) {
+    gameData.inventory.push(item);
+}
 
     alert("Перемога в рейді!");
 
@@ -870,7 +882,10 @@ async function attackPlayer(targetId, targetPower) {
         gameData.gold += 100;
         gameData.hero.exp += 40;
 
-        if (Math.random() < 0.5) gameData.inventory.push(getItem());
+        if (Math.random() < 0.5) const item = getItem();
+if (item) {
+    gameData.inventory.push(item);
+}
 
         alert("Перемога в PvP!");
     } else {
