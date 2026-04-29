@@ -129,13 +129,15 @@ function fixOldSaves() {
 
     if (!gameData.equipmentPower) {
     gameData.equipmentPower = {
-        helmet: gameData.equipped?.helmet?.power || 0,
-        armor: gameData.equipped?.armor?.power || 0,
-        pants: gameData.equipped?.pants?.power || 0,
-        boots: gameData.equipped?.boots?.power || 0,
-        weapon: gameData.equipped?.weapon?.power || 0
+        helmet: 0,
+        armor: 0,
+        pants: 0,
+        boots: 0,
+        weapon: 0
     };
-    if (!gameData.armyHired) {
+}
+
+if (!gameData.armyHired) {
     gameData.armyHired = {
         swordsmen: gameData.army?.swordsmen || 0,
         archers: gameData.army?.archers || 0,
@@ -152,7 +154,7 @@ function armyHirePrice(type) {
 
     return Math.floor(base[type] * Math.pow(1.2, gameData.armyHired[type] || 0));
 }
-}
+
 
 async function save() {
     if (!playerRef) return;
@@ -458,20 +460,23 @@ function show(section) {
         `;
     }
 
-    if (section === "inventory") {
-        content.innerHTML = `
-            <h2>Сумка</h2>
-            ${
-                gameData.inventory.length === 0
-                ? "Порожньо"
-                : gameData.inventory.map((item, index) => `
-                    <div style="color:${item.color}">
-                        ${item.icon} ${item.name} (+${item.power})
-                        <button onclick="equip(${index})">Одягнути</button>
-                    </div>
-                `).join("")
-            }
-        `;
+if (section === "inventory") {
+    content.innerHTML = `
+        <h2>Сумка</h2>
+        <button onclick="equipAll()">Одягнути все</button><br><br>
+        ${
+            gameData.inventory.length === 0
+            ? "Порожньо"
+            : gameData.inventory.map((item, index) => `
+                <div style="color:${item.color}">
+                    ${item.icon} ${item.name} (+${item.power})
+                    <button onclick="equip(${index})">Одягнути</button>
+                </div>
+            `).join("")
+        }
+    `;
+}
+
         async function equipAll() {
     if (!gameData.inventory || gameData.inventory.length === 0) {
         alert("Сумка порожня");
@@ -623,7 +628,7 @@ if (section === "shop") {
     if (section === "chat") loadChat();
     if (section === "rating") loadRating();
     if (section === "friends") loadFriends();
-}
+
 
 async function upgradeCastle() {
     if (!canUpgradeCastle()) {
@@ -718,6 +723,24 @@ function checkLevelUp() {
     }
 }
 
+function armyHirePrice(type) {
+    if (!gameData.armyHired) {
+        gameData.armyHired = {
+            swordsmen: 0,
+            archers: 0,
+            knights: 0
+        };
+    }
+
+    const base = {
+        swordsmen: 30,
+        archers: 80,
+        knights: 200
+    };
+
+    return Math.floor(base[type] * Math.pow(1.2, gameData.armyHired[type]));
+}
+
 async function buyShopItem(type) {
     const price = shopPrice();
 
@@ -740,14 +763,15 @@ async function equip(index) {
     const item = gameData.inventory[index];
 
     if (!gameData.equipmentPower) {
-        gameData.equipmentPower = {
-            helmet: 0,
-            armor: 0,
-            pants: 0,
-            boots: 0,
-            weapon: 0
-        };
-    }
+    gameData.equipmentPower = {
+        helmet: 0,
+        armor: 0,
+        pants: 0,
+        boots: 0,
+        weapon: 0
+    };
+}
+
 
     gameData.equipmentPower[item.type] += item.power;
 
@@ -984,6 +1008,44 @@ async function changeHero(type) {
     show("hero");
 
     alert("Героя змінено!");
+}
+
+async function equipAll() {
+    if (!gameData.inventory || gameData.inventory.length === 0) {
+        alert("Сумка порожня");
+        return;
+    }
+
+    if (!gameData.equipmentPower) {
+        gameData.equipmentPower = {
+            helmet: 0,
+            armor: 0,
+            pants: 0,
+            boots: 0,
+            weapon: 0
+        };
+    }
+
+    gameData.inventory.forEach(item => {
+        gameData.equipmentPower[item.type] += item.power;
+
+        gameData.equipped[item.type] = {
+            name: item.name,
+            type: item.type,
+            icon: item.icon,
+            power: gameData.equipmentPower[item.type],
+            color: item.color
+        };
+    });
+
+    gameData.inventory = [];
+
+    recalc();
+    await save();
+    updateUI();
+    show("hero");
+
+    alert("Усе одягнуто!");
 }
 
 function fmt(item) {
