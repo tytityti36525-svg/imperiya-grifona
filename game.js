@@ -101,6 +101,7 @@ if (!gameData.version || gameData.version < GAME_VERSION) {
 
     updateUI();
     show("hero");
+    startGame(uid)
 }
 
 function fixOldSaves() {
@@ -605,6 +606,7 @@ if (section === "pvp") loadPvP();
 if (section === "chat") loadChat();
 if (section === "rating") loadRating();
 if (section === "friends") loadFriends();
+if (section === "mail") loadMail();
 }
 
 async function upgradeCastle() {
@@ -982,6 +984,9 @@ async function loadFriends() {
         html += `
             <div style="margin:10px;padding:10px;background:#2b1a10;border-radius:10px;">
                 🤝 ${f.name}
+<br>
+<button onclick="openProfile('${f.id}')">👤 Профіль</button>
+<button onclick="openPrivateChat('${f.id}', '${f.name}')">✉️ Написати</button>
             </div>
         `;
     });
@@ -1094,3 +1099,141 @@ if (typeof addFriend !== "undefined") window.addFriend = addFriend;
 if (typeof changeHero !== "undefined") window.changeHero = changeHero;
 if (typeof sendMessage !== "undefined") window.sendMessage = sendMessage;
 if (typeof logout !== "undefined") window.logout = logout;
+async function openProfile(friendId) {
+    const snap = await db.collection("players").doc(friendId).get();
+
+    if (!snap.exists) {
+        alert("Гравця не знайдено");
+        return;
+    }
+
+    const p = snap.data();
+
+    content.innerHTML = `
+        <h2>👤 Профіль</h2>
+        <b>${p.nick || p.login || "Гравець"}</b><br>
+        Рівень: ${p.level || 1}<br>
+        Сила: ${p.power || 10}<br>
+        Золото: ${p.gold || 0}<br>
+        Алмази: ${p.diamonds || 0}<br><br>
+
+        <button onclick="openPrivateChat('${friendId}', '${p.nick || p.login || "Гравець"}')">
+            ✉️ Написати
+        </button>
+    `;
+}
+
+function chatIdWith(otherId) {
+    return [playerId, otherId].sort().join("_");
+}
+
+function openPrivateChat(friendId, friendName) {
+    const chatId = chatIdWith(friendId);
+
+    content.innerHTML = `
+        <h2>✉️ Листування з ${friendName}</h2>
+        <div id="privateChatBox" style="height:250px;overflow:auto;background:#111;padding:10px;border-radius:10px;"></div>
+        <br>
+        <input id="privateMsg" placeholder="Напиши повідомлення">
+        <button onclick="sendPrivateMessage('${friendId}', '${friendName}')">Відправити</button>
+    `;
+
+    db.collection("privateChats")
+        .doc(chatId)
+        .collection("messages")
+        .orderBy("time")
+        .limit(50)
+        .onSnapshot(snapshot => {
+            let html = "";
+
+            snapshot.forEach(doc => {
+                const m = doc.data();
+                html += `<div><b>${m.fromName}</b>: ${m.text}</div>`;
+            });
+
+            const box = document.getElementById("privateChatBox");
+            if (box) {
+                box.innerHTML = html;
+                box.scrollTop = box.scrollHeight;
+            }
+        });
+}
+
+async function sendPrivateMessage(friendId, friendName) {
+    const input = document.getElementById("privateMsg");
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    const meSnap = await playerRef.get();
+    const me = meSnap.data() || {};
+    const myName = me.nick || me.login || "Гравець";
+
+    const chatId = chatIdWith(friendId);
+
+    await db.collection("privateChats")
+        .doc(chatId)
+        .collection("messages")
+        .add({
+            from: playerId,
+            fromName: myName,
+            to: friendId,
+            toName: friendName,
+            text: text,
+            time: Date.now(),
+            read: false
+        });
+
+    input.value = "";
+}
+
+async function loadMail() {
+    const snap = await db.collectionGroup("messages")
+        .where("to", "==", playerId)
+        .orderBy("time", "desc")
+        .limit(50)
+        .get();
+
+    let html = `<h2>📩 Пошта</h2>`;
+
+    if (snap.empty) {
+        html += `<p>Повідомлень немає.</p>`;
+    }
+
+    snap.forEach(doc => {
+        const m = doc.data();
+
+        html += `
+            <div style="margin:10px;padding:10px;background:#2b1a10;border-radius:10px;">
+                <b>${m.fromName}</b><br>
+                ${m.text}<br>
+                <small>${new Date(m.time).toLocaleString()}</small><br>
+                <button onclick="openPrivateChat('${m.from}', '${m.fromName}')">Відповісти</button>
+            </div>
+        `;
+    });
+
+    content.innerHTML = html;
+}
+
+function watchMail() {
+    db.collectionGroup("messages")
+        .where("to", "==", playerId)
+        .where("read", "==", false)
+        .onSnapshot(snapshot => {
+            const btn = document.getElementById("mailBtn");
+            if (!btn) return;
+
+            if (!snapshot.empty) {
+                btn.style.background = "linear-gradient(#ffdf5d, #d48b00)";
+                btn.innerText = "📩 Нова пошта";
+            } else {
+                btn.style.background = "";
+                btn.innerText = "📩 Пошта";
+            }
+        });
+}
+window.openProfile = openProfile;
+window.openPrivateChat = openPrivateChat;
+window.sendPrivateMessage = sendPrivateMessage;
+window.loadMail = loadMail;
