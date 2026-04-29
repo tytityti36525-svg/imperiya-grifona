@@ -101,7 +101,7 @@ if (!gameData.version || gameData.version < GAME_VERSION) {
 
     updateUI();
     show("hero");
-    startGame(uid)
+    watchMail();
 }
 
 function fixOldSaves() {
@@ -817,15 +817,9 @@ async function startRaid(enemyPower, enemyArmy, reward) {
     gameData.hero.exp += 60;
 
     if (Math.random() < 0.05) {
-    const item = getItem();
-
-    if (item) {
-        gameData.inventory.push(item);
+        const item = getItem();
+        if (item) gameData.inventory.push(item);
     }
-}
-if (item) {
-    gameData.inventory.push(item);
-}
 
     alert("Перемога в рейді!");
 
@@ -893,10 +887,10 @@ async function attackPlayer(targetId, targetPower) {
         gameData.gold += 100;
         gameData.hero.exp += 40;
 
-        if (Math.random() < 0.5) const item = getItem();
-if (item) {
-    gameData.inventory.push(item);
-}
+        if (Math.random() < 0.05) {
+            const item = getItem();
+            if (item) gameData.inventory.push(item);
+        }
 
         alert("Перемога в PvP!");
     } else {
@@ -1013,43 +1007,6 @@ async function changeHero(type) {
     alert("Героя змінено!");
 }
 
-async function equipAll() {
-    if (!gameData.inventory || gameData.inventory.length === 0) {
-        alert("Сумка порожня");
-        return;
-    }
-
-    if (!gameData.equipmentPower) {
-        gameData.equipmentPower = {
-            helmet: 0,
-            armor: 0,
-            pants: 0,
-            boots: 0,
-            weapon: 0
-        };
-    }
-
-    gameData.inventory.forEach(item => {
-        gameData.equipmentPower[item.type] += item.power;
-
-        gameData.equipped[item.type] = {
-            name: item.name,
-            type: item.type,
-            icon: item.icon,
-            power: gameData.equipmentPower[item.type],
-            color: item.color
-        };
-    });
-
-    gameData.inventory = [];
-
-    recalc();
-    await save();
-    updateUI();
-    show("hero");
-
-    alert("Усе одягнуто!");
-}
  async function equipAll() {
     if (!gameData.inventory || gameData.inventory.length === 0) {
         alert("Сумка порожня");
