@@ -38,19 +38,20 @@ function defaultGame() {
             knights: 0
         },
         equipped: {
-            helmet: null,
-            armor: null,
-            pants: null,
-            boots: null,
-            weapon: null
-        }
-        equipmentPower: {
+    helmet: null,
+    armor: null,
+    pants: null,
+    boots: null,
+    weapon: null
+}, // ← ОЦЕ ДОДАЙ
+
+equipmentPower: {
     helmet: 0,
     armor: 0,
     pants: 0,
     boots: 0,
     weapon: 0
-    },
+},
     };
 }
 
