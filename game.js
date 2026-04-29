@@ -301,15 +301,15 @@ function generateRaidEnemy() {
 }
 function heroImage() {
     const heroes = {
-        mage: "🧙‍♂️",
-        knight: "🤺",
-        barbarian: "🪓",
-        elf: "🧝‍♂️",
-        druid: "🌿🧙",
-        vampire: "🧛‍♂️"
+        mage: "images/mage.png",
+        knight: "images/knight.png",
+        barbarian: "images/barbarian.png",
+        elf: "images/elf.png",
+        druid: "images/druid.png",
+        vampire: "images/vampire.png"
     };
 
-    return heroes[gameData.hero.heroClass] || "🧙‍♂️";
+    return heroes[gameData.hero.heroClass] || "images/elf.png";
 }
 
 function heroName() {
@@ -334,7 +334,7 @@ function show(section) {
     if (section === "hero") {
         content.innerHTML = `
             <h2>Герой</h2>
-            <div style="font-size:120px;">${heroImage()}</div>
+            <img src="${heroImage()}" class="hero-img">
             Клас: ${heroName()}<br>
             Сила: ${gameData.hero.attack}<br>
             Рівень: ${gameData.hero.level}<br>

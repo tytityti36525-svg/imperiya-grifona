@@ -81,3 +81,10 @@ input {
     margin: 5px 0;
     width: 100%;
 }
+
+.hero-img {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    margin: 10px 0;
+}
