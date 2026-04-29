@@ -445,23 +445,32 @@ function show(section) {
         `;
     }
 
-    if (section === "shop") {
-        const r = getShopRarity();
-        const price = shopPrice();
+if (section === "shop") {
+    const r = getShopRarity();
+    const price = shopPrice();
 
-        content.innerHTML = `
-            <h2>💎 Магазин</h2>
-            Алмази: ${gameData.diamonds}<br>
-            Предмети магазину: <span style="color:${r.color}">${r.name}</span><br>
-            Ціна за предмет: ${price} 💎<br><br>
+    content.innerHTML = `
+        <h2>💎 Магазин</h2>
+        Алмази: ${gameData.diamonds}<br>
+        Предмети магазину: <span style="color:${r.color}">${r.name}</span><br>
+        Ціна за предмет: ${price} 💎<br><br>
 
-            <button onclick="buyShopItem('helmet')">🪖 Купити шолом</button>
-            <button onclick="buyShopItem('armor')">🛡️ Купити броню</button>
-            <button onclick="buyShopItem('pants')">👖 Купити штани</button>
-            <button onclick="buyShopItem('boots')">👢 Купити чоботи</button>
-            <button onclick="buyShopItem('weapon')">⚔️ Купити меч</button>
-        `;
-    }
+        <div style="font-size:55px;">🪖</div>
+        <button onclick="buyShopItem('helmet')">Купити шолом</button><br><br>
+
+        <div style="font-size:55px;">🛡️</div>
+        <button onclick="buyShopItem('armor')">Купити броню</button><br><br>
+
+        <div style="font-size:55px;">👖</div>
+        <button onclick="buyShopItem('pants')">Купити штани</button><br><br>
+
+        <div style="font-size:55px;">👢</div>
+        <button onclick="buyShopItem('boots')">Купити чоботи</button><br><br>
+
+        <div style="font-size:55px;">⚔️</div>
+        <button onclick="buyShopItem('weapon')">Купити меч</button>
+    `;
+}
 
     if (section === "pvp") loadPvP();
     if (section === "chat") loadChat();
