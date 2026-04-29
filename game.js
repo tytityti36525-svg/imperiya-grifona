@@ -586,11 +586,11 @@ if (section === "shop") {
     `;
 }
 
-    if (section === "pvp") loadPvP();
-    if (section === "chat") loadChat();
-    if (section === "rating") loadRating();
-    if (section === "friends") loadFriends();
-
+if (section === "pvp") loadPvP();
+if (section === "chat") loadChat();
+if (section === "rating") loadRating();
+if (section === "friends") loadFriends();
+}
 
 async function upgradeCastle() {
     if (!canUpgradeCastle()) {
@@ -1046,7 +1046,7 @@ async function equipAll() {
 
     alert("Усе одягнуто!");
 }
-    }
+    
 function fmt(item) {
     return item
         ? `<span style="color:${item.color}">${item.name} (+${item.power} сили)</span>`
