@@ -1,77 +1,83 @@
 body {
-margin:0;
-font-family:Arial;
-background:linear-gradient(#2c1b12,#1a0f0a);
-color:white;
-text-align:center;
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(#2b1a10, #1a0f08);
+    color: #f5e6d3;
 }
 
-#app {
-max-width:500px;
-margin:auto;
-padding:20px;
+/* Основні блоки */
+#mainMenu, #content, #auth, #game {
+    background: #3b2417;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
 }
 
-h1,h2 {
-color:gold;
-}
-
-#auth {
-background:rgba(0,0,0,0.6);
-padding:20px;
-border-radius:10px;
-}
-
+/* Верхня панель */
 #topbar {
-display:flex;
-justify-content:space-around;
-background:#3b2415;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
+    display: flex;
+    justify-content: space-around;
+    background: #5a3825;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: bold;
 }
 
+/* Кнопки */
+button {
+    background: linear-gradient(#b07a4f, #7a4e2d);
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 10px;
+    color: #1a0f08;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Hover */
+button:hover {
+    background: linear-gradient(#d49a63, #9c623a);
+    transform: scale(1.05);
+}
+
+/* Нижнє меню */
+#bottomMenu {
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Прогрес бар */
 #expBar {
-width:100%;
-height:30px;
-background:#111;
-border-radius:30px;
-overflow:hidden;
+    background: #2b1a10;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
 }
 
 #expFill {
-height:100%;
-background:linear-gradient(90deg,#00eaff,#007bff);
-line-height:30px;
-border-radius:30px;
-transition:0.3s;
+    background: linear-gradient(to right, #d49a63, #b07a4f);
+    height: 20px;
+    text-align: center;
+    color: #1a0f08;
+    font-weight: bold;
 }
 
-button {
-background:linear-gradient(#d4a017,#8b5a2b);
-border:none;
-padding:12px;
-margin:5px;
-border-radius:12px;
-color:white;
-font-weight:bold;
-cursor:pointer;
+/* Заголовки */
+h1, h2 {
+    text-align: center;
+    color: #f5e6d3;
 }
 
-button:hover {
-transform:scale(1.1);
-}
-
-#content {
-background:rgba(0,0,0,0.5);
-padding:15px;
-border-radius:10px;
-min-height:200px;
-}
-
+/* Поля вводу */
 input {
-padding:8px;
-margin:5px;
-border-radius:5px;
-border:none;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    margin: 5px 0;
+    width: 100%;
 }
