@@ -21,6 +21,7 @@ function defaultGame() {
             endurance: 0,
             vitality: 0,
             attack: 10
+            class: "mage",
         },
         gold: 500,
         diamonds: 5,
@@ -110,6 +111,7 @@ function fixOldSaves() {
     if (gameData.equipped.pants === undefined) gameData.equipped.pants = null;
     if (gameData.equipped.boots === undefined) gameData.equipped.boots = null;
     if (gameData.equipped.weapon === undefined) gameData.equipped.weapon = null;
+    if (gameData.hero.class === undefined) gameData.hero.class = "mage";
 }
 
 async function save() {
@@ -297,6 +299,31 @@ function generateRaidEnemy() {
         reward: raid.reward
     };
 }
+function heroImage() {
+    const heroes = {
+        mage: "🧙‍♂️",
+        knight: "🤺",
+        barbarian: "🪓",
+        elf: "🧝‍♂️",
+        druid: "🌿🧙",
+        vampire: "🧛‍♂️"
+    };
+
+    return heroes[gameData.hero.class] || "🧙‍♂️";
+}
+
+function heroName() {
+    const names = {
+        mage: "Маг",
+        knight: "Рицар",
+        barbarian: "Варвар",
+        elf: "Ельф",
+        druid: "Друїд",
+        vampire: "Вампір"
+    };
+
+    return names[gameData.hero.class] || "Маг";
+}
 
 function show(section) {
     if (section !== "chat" && chatUnsubscribe) {
@@ -307,7 +334,8 @@ function show(section) {
     if (section === "hero") {
         content.innerHTML = `
             <h2>Герой</h2>
-            <div style="font-size:120px;">🧙‍♂️</div>
+            <div style="font-size:120px;">${heroImage()}</div>
+            Клас: ${heroName()}<br>
             Сила: ${gameData.hero.attack}<br>
             Рівень: ${gameData.hero.level}<br>
             Досвід: ${gameData.hero.exp}/${gameData.hero.expMax}<br><br>
@@ -444,6 +472,44 @@ function show(section) {
             <button onclick="startRaid(${raid.power}, ${raid.army}, ${raid.reward})">Почати рейд</button>
         `;
     }
+    if (section === "settings") {
+    content.innerHTML = `
+        <h2>⚙️ Налаштування</h2>
+        <h3>Зміна героя</h3>
+
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+            <button onclick="changeHero('mage')">
+                <div style="font-size:55px;">🧙‍♂️</div>
+                Маг
+            </button>
+
+            <button onclick="changeHero('knight')">
+                <div style="font-size:55px;">🤺</div>
+                Рицар
+            </button>
+
+            <button onclick="changeHero('barbarian')">
+                <div style="font-size:55px;">🪓</div>
+                Варвар
+            </button>
+
+            <button onclick="changeHero('elf')">
+                <div style="font-size:55px;">🧝‍♂️</div>
+                Ельф
+            </button>
+
+            <button onclick="changeHero('druid')">
+                <div style="font-size:55px;">🌿🧙</div>
+                Друїд
+            </button>
+
+            <button onclick="changeHero('vampire')">
+                <div style="font-size:55px;">🧛‍♂️</div>
+                Вампір
+            </button>
+        </div>
+    `;
+}
 
 if (section === "shop") {
     const r = getShopRarity();
@@ -811,6 +877,16 @@ async function loadFriends() {
     });
 
     content.innerHTML = html;
+}
+
+async function changeHero(type) {
+    gameData.hero.class = type;
+
+    await save();
+    updateUI();
+    show("hero");
+
+    alert("Героя змінено!");
 }
 
 function fmt(item) {
