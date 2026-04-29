@@ -672,9 +672,12 @@ async function fight() {
         gameData.gold += currentEnemy.reward;
         gameData.hero.exp += currentEnemy.exp;
 
-        if (Math.random() < 0.7) const item = getItem();
-if (item) {
-    gameData.inventory.push(item);
+       if (Math.random() < 0.05) {
+    const item = getItem();
+
+    if (item) {
+        gameData.inventory.push(item);
+    }
 }
 
         alert("Перемога!");
