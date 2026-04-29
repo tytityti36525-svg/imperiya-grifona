@@ -477,44 +477,6 @@ if (section === "inventory") {
     `;
 }
 
-        async function equipAll() {
-    if (!gameData.inventory || gameData.inventory.length === 0) {
-        alert("Сумка порожня");
-        return;
-    }
-
-    if (!gameData.equipmentPower) {
-        gameData.equipmentPower = {
-            helmet: 0,
-            armor: 0,
-            pants: 0,
-            boots: 0,
-            weapon: 0
-        };
-    }
-
-    gameData.inventory.forEach(item => {
-        gameData.equipmentPower[item.type] += item.power;
-
-        gameData.equipped[item.type] = {
-            name: item.name,
-            type: item.type,
-            icon: item.icon,
-            power: gameData.equipmentPower[item.type],
-            color: item.color
-        };
-    });
-
-    gameData.inventory = [];
-
-    recalc();
-    await save();
-    updateUI();
-    show("hero");
-
-    alert("Усе одягнуто!");
-}
-    }
 
     if (section === "army") {
         content.innerHTML = `
@@ -1047,7 +1009,44 @@ async function equipAll() {
 
     alert("Усе одягнуто!");
 }
+ async function equipAll() {
+    if (!gameData.inventory || gameData.inventory.length === 0) {
+        alert("Сумка порожня");
+        return;
+    }
 
+    if (!gameData.equipmentPower) {
+        gameData.equipmentPower = {
+            helmet: 0,
+            armor: 0,
+            pants: 0,
+            boots: 0,
+            weapon: 0
+        };
+    }
+
+    gameData.inventory.forEach(item => {
+        gameData.equipmentPower[item.type] += item.power;
+
+        gameData.equipped[item.type] = {
+            name: item.name,
+            type: item.type,
+            icon: item.icon,
+            power: gameData.equipmentPower[item.type],
+            color: item.color
+        };
+    });
+
+    gameData.inventory = [];
+
+    recalc();
+    await save();
+    updateUI();
+    show("hero");
+
+    alert("Усе одягнуто!");
+}
+    }
 function fmt(item) {
     return item
         ? `<span style="color:${item.color}">${item.name} (+${item.power} сили)</span>`
