@@ -397,7 +397,7 @@ function show(section) {
     if (section === "castle") {
         content.innerHTML = `
             <h2>Замок</h2>
-            <div style="font-size:110px;">🏰</div>
+            <img src="images/castle.png" class="castle-img">
             Рівень замку: ${gameData.castleLevel}<br>
             Ціна покращення: ${castlePrice()} золота<br>
             ${

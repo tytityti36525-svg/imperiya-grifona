@@ -88,3 +88,10 @@ input {
     object-fit: contain;
     margin: 10px 0;
 }
+
+.castle-img {
+    width: 220px;
+    max-width: 100%;
+    object-fit: contain;
+    margin: 10px 0;
+}
