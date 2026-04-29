@@ -332,7 +332,7 @@ function generateEnemy() {
     ];
 
     const enemy = enemies[Math.floor(Math.random() * enemies.length)];
-    const basePower = 10 * Math.pow(1.15, gameData.hero.level - 1) * (gameData.enemyScale || 1);
+    const basePower = 10 * Math.pow(1.2, gameData.hero.level - 1) * (gameData.enemyScale || 1);
     const random = 0.85 + Math.random() * 0.35;
 
     return {
