@@ -346,7 +346,7 @@ function generateEnemy() {
 
 function generateRaidEnemy() {
     const raids = [
-        { name: "Бандити", icon: "🗡️", minPower: 30, maxPower: 50, minArmy: 3, reward: 120 },
+        { name: "Бандити", icon: "🪓", minPower: 30, maxPower: 50, minArmy: 3, reward: 120 },
         { name: "Розбійники", icon: "🏹", minPower: 50, maxPower: 80, minArmy: 5, reward: 200 },
         { name: "Лицарі", icon: "🛡️", minPower: 80, maxPower: 120, minArmy: 8, reward: 350 },
         { name: "Елітна гвардія", icon: "👑", minPower: 120, maxPower: 180, minArmy: 12, reward: 600 }
@@ -354,21 +354,26 @@ function generateRaidEnemy() {
 
     const raid = raids[Math.floor(Math.random() * raids.length)];
 
-    const basePower = Math.floor(Math.random() * (raid.maxPower - raid.minPower + 1)) + raid.minPower;
+    const heroLevel = gameData.hero?.level || 1;
 
-    let scale = Math.pow(1.2, gameData.hero.level - 1);
+    const basePower =
+        Math.floor(Math.random() * (raid.maxPower - raid.minPower + 1)) + raid.minPower;
 
-    if (gameData.hero.level >= 15) {
-        scale *= Math.pow(1.35, gameData.hero.level - 14);
+    let scale = Math.pow(1.2, heroLevel - 1);
+
+    if (heroLevel >= 15) {
+        scale *= Math.pow(1.35, heroLevel - 14);
     }
 
     return {
         name: raid.name,
         icon: raid.icon,
+        power: Math.floor(basePower * scale),
         army: raid.minArmy,
         reward: raid.reward
     };
 }
+
 function heroImage() {
     const heroes = {
         mage: "images/mage.png",
