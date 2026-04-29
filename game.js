@@ -44,6 +44,13 @@ function defaultGame() {
             boots: null,
             weapon: null
         }
+        equipmentPower: {
+    helmet: 0,
+    armor: 0,
+    pants: 0,
+    boots: 0,
+    weapon: 0
+    },
     };
 }
 
@@ -157,8 +164,12 @@ function recalc() {
 
     atk += (gameData.buildings.forge - 1) * 2;
 
-    for (let key in gameData.equipped) {
-        if (gameData.equipped[key]) atk += gameData.equipped[key].power;
+    if (gameData.equipmentPower) {
+        atk += gameData.equipmentPower.helmet || 0;
+        atk += gameData.equipmentPower.armor || 0;
+        atk += gameData.equipmentPower.pants || 0;
+        atk += gameData.equipmentPower.boots || 0;
+        atk += gameData.equipmentPower.weapon || 0;
     }
 
     gameData.hero.attack = atk;
@@ -693,7 +704,7 @@ async function equip(index) {
     recalc();
     await save();
     updateUI();
-    show("inventory");
+    show("hero");
 }
 
 async function hireArmy(type) {
@@ -920,6 +931,6 @@ async function changeHero(type) {
 
 function fmt(item) {
     return item
-        ? `<span style="color:${item.color}">${item.name} (+${item.power})</span>`
+        ? `<span style="color:${item.color}">${item.name} (+${item.power} сили)</span>`
         : "—";
 }
