@@ -475,6 +475,7 @@ if (section === "shop") {
     if (section === "pvp") loadPvP();
     if (section === "chat") loadChat();
     if (section === "rating") loadRating();
+    if (section === "friends") loadFriends();
 }
 
 async function upgradeCastle() {
@@ -654,16 +655,25 @@ async function startRaid(enemyPower, enemyArmy, reward) {
 async function loadRating() {
     const snap = await db.collection("players")
         .orderBy("level", "desc")
-        .limit(30)
+        .limit(50)
         .get();
 
-    let html = `<h2>🏆 Рейтинг</h2>`;
+    let html = `<h2>🏆 Рейтинг гравців</h2>`;
 
     snap.forEach(doc => {
         const p = doc.data();
         if (!p.nick && !p.login) return;
 
-        html += `<div>${p.nick || p.login} — рівень ${p.level || 1}, сила ${p.power || 10}</div>`;
+        html += `
+            <div style="margin:10px;padding:10px;background:#2b1a10;border-radius:10px;">
+                <b>${p.nick || p.login}</b><br>
+                Рівень: ${p.level || 1}<br>
+                Сила: ${p.power || 10}<br>
+                ${doc.id !== playerId ? `
+                    <button onclick="addFriend('${doc.id}', '${p.nick || p.login}')">🤝 Додати в друзі</button>
+                ` : `<span>Це ти</span>`}
+            </div>
+        `;
     });
 
     content.innerHTML = html;
@@ -756,6 +766,51 @@ async function sendMessage() {
     });
 
     input.value = "";
+}
+
+async function addFriend(friendId, friendName) {
+    if (friendId === playerId) {
+        alert("Не можна додати себе");
+        return;
+    }
+
+    await db.collection("players")
+        .doc(playerId)
+        .collection("friends")
+        .doc(friendId)
+        .set({
+            id: friendId,
+            name: friendName,
+            addedAt: Date.now()
+        });
+
+    alert(friendName + " доданий у друзі!");
+}
+
+async function loadFriends() {
+    const snap = await db.collection("players")
+        .doc(playerId)
+        .collection("friends")
+        .orderBy("addedAt", "desc")
+        .get();
+
+    let html = `<h2>🤝 Мої друзі</h2>`;
+
+    if (snap.empty) {
+        html += `<p>У тебе ще немає друзів.</p>`;
+    }
+
+    snap.forEach(doc => {
+        const f = doc.data();
+
+        html += `
+            <div style="margin:10px;padding:10px;background:#2b1a10;border-radius:10px;">
+                🤝 ${f.name}
+            </div>
+        `;
+    });
+
+    content.innerHTML = html;
 }
 
 function fmt(item) {
