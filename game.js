@@ -354,10 +354,17 @@ function generateRaidEnemy() {
 
     const raid = raids[Math.floor(Math.random() * raids.length)];
 
+    const basePower = Math.floor(Math.random() * (raid.maxPower - raid.minPower + 1)) + raid.minPower;
+
+    let scale = Math.pow(1.2, gameData.hero.level - 1);
+
+    if (gameData.hero.level >= 15) {
+        scale *= Math.pow(1.35, gameData.hero.level - 14);
+    }
+
     return {
         name: raid.name,
         icon: raid.icon,
-        power: Math.floor(Math.random() * (raid.maxPower - raid.minPower + 1)) + raid.minPower,
         army: raid.minArmy,
         reward: raid.reward
     };
