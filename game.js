@@ -20,8 +20,8 @@ function defaultGame() {
             strength: 0,
             endurance: 0,
             vitality: 0,
-            attack: 10
-            class: "mage",
+            attack: 10,
+            heroClass: "mage",
         },
         gold: 500,
         diamonds: 5,
@@ -111,7 +111,7 @@ function fixOldSaves() {
     if (gameData.equipped.pants === undefined) gameData.equipped.pants = null;
     if (gameData.equipped.boots === undefined) gameData.equipped.boots = null;
     if (gameData.equipped.weapon === undefined) gameData.equipped.weapon = null;
-    if (gameData.hero.class === undefined) gameData.hero.class = "mage";
+    if (gameData.hero.heroClass === undefined) gameData.hero.heroClass = "mage";
 }
 
 async function save() {
@@ -309,7 +309,7 @@ function heroImage() {
         vampire: "🧛‍♂️"
     };
 
-    return heroes[gameData.hero.class] || "🧙‍♂️";
+    return heroes[gameData.hero.heroClass] || "🧙‍♂️";
 }
 
 function heroName() {
@@ -322,7 +322,7 @@ function heroName() {
         vampire: "Вампір"
     };
 
-    return names[gameData.hero.class] || "Маг";
+    return names[gameData.hero.heroClass] || "Маг";
 }
 
 function show(section) {
@@ -880,7 +880,7 @@ async function loadFriends() {
 }
 
 async function changeHero(type) {
-    gameData.hero.class = type;
+    gameData.hero.heroClass = type;
 
     await save();
     updateUI();
