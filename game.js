@@ -1052,3 +1052,18 @@ function fmt(item) {
         ? `<span style="color:${item.color}">${item.name} (+${item.power} сили)</span>`
         : "—";
 }
+
+window.show = show;
+window.upgradeCastle = upgradeCastle;
+window.upgradeBuilding = upgradeBuilding;
+window.fight = fight;
+window.train = train;
+window.equip = equip;
+window.equipAll = equipAll;
+window.hireArmy = hireArmy;
+window.startRaid = startRaid;
+window.buyShopItem = buyShopItem;
+window.addFriend = addFriend;
+window.changeHero = changeHero;
+window.sendMessage = sendMessage;
+window.logout = logout;
