@@ -816,7 +816,13 @@ async function startRaid(enemyPower, enemyArmy, reward) {
     gameData.gold += reward;
     gameData.hero.exp += 60;
 
-    if (Math.random() < 0.7) const item = getItem();
+    if (Math.random() < 0.05) {
+    const item = getItem();
+
+    if (item) {
+        gameData.inventory.push(item);
+    }
+}
 if (item) {
     gameData.inventory.push(item);
 }
