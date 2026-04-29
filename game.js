@@ -14,6 +14,7 @@ let chatUnsubscribe = null;
 function defaultGame() {
     return {
         version: 2,
+        enemyScale: 1,
         hero: {
             level: 1,
             exp: 0,
@@ -331,7 +332,7 @@ function generateEnemy() {
     ];
 
     const enemy = enemies[Math.floor(Math.random() * enemies.length)];
-    const basePower = 10 * Math.pow(1.15, gameData.hero.level - 1);
+    const basePower = 10 * Math.pow(1.15, gameData.hero.level - 1) * (gameData.enemyScale || 1);
     const random = 0.85 + Math.random() * 0.35;
 
     return {
@@ -669,21 +670,20 @@ async function fight() {
     if (!currentEnemy) currentEnemy = generateEnemy();
 
     if (gameData.hero.attack >= currentEnemy.power) {
-        gameData.gold += currentEnemy.reward;
-        gameData.hero.exp += currentEnemy.exp;
+    gameData.gold += currentEnemy.reward;
+    gameData.hero.exp += currentEnemy.exp;
 
-       if (Math.random() < 0.05) {
     const item = getItem();
-
     if (item) {
         gameData.inventory.push(item);
     }
+
+    alert("Перемога!");
+} else {
+    alert("Поразка. Прокачай героя або армію.");
 }
 
-        alert("Перемога!");
-    } else {
-        alert("Поразка. Прокачай героя або армію.");
-    }
+gameData.enemyScale *= 1.02; // +2%
 
     checkLevelUp();
     recalc();
