@@ -48,7 +48,7 @@ async function register() {
     const pass = document.getElementById("password").value;
 
     if (!nick || !loginValue || !pass) {
-        alert("Заповни всі поля!");
+        alert("Заповни всі поля");
         return;
     }
 
@@ -57,10 +57,10 @@ async function register() {
     try {
         const cred = await authFirebase.createUserWithEmailAndPassword(email, pass);
 
-        await db.collection("players").doc(cred.user.uid).set({
+       await db.collection("players").doc(cred.user.uid).set({
             uid: cred.user.uid,
             nick: nick,
-            login: loginValue,
+            login: loginValue, // тут зберігаємо чистий логін
             level: 1,
             gold: 500,
             power: 10,
@@ -74,9 +74,9 @@ async function register() {
             createdAt: Date.now()
         });
 
-        alert("Акаунт створено успішно!");
+        alert("Акаунт створено! Тепер можеш увійти.");
     } catch (error) {
-        console.error(error);
+        console.error("Помилка реєстрації:", error);
         alert("Помилка реєстрації: " + error.message);
     }
 }
