@@ -8,86 +8,62 @@
 <body>
 
 <div id="app">
+    <!-- Головне меню -->
+    <div id="mainMenu">
+        <h1>🦅 Імперія Грифона</h1>
+        <button onclick="showLogin()">Увійти</button>
+        <button onclick="showRegister()">Реєстрація</button>
+    </div>
 
-<div id="mainMenu">
-<h1>🦅 Імперія Грифона</h1>
-<button onclick="showLogin()">Увійти</button>
-<button onclick="showRegister()">Реєстрація</button>
+    <!-- Вікно авторизації -->
+    <div id="auth" style="display:none;"></div> 
+
+    <!-- Основна гра -->
+    <div id="game" style="display:none;">
+        <!-- Панель ресурсів -->
+        <div id="topbar">
+            <span>💰 <span id="gold">0</span></span>
+            <span>💎 <span id="diamonds">0</span></span>
+            <span>⚔️ <span id="power">0</span></span>
+            <span>⭐ <span id="level">1</span></span>
+        </div>
+
+        <!-- Смужка досвіду -->
+        <div id="expBar">
+            <div id="expFill">0%</div>
+        </div>
+
+        <!-- Лог останнього бою -->
+        <div id="battleLog" style="height:40px; color:#ffdf5d; text-align:center; font-style:italic; margin: 10px 0;"></div>
+
+        <!-- Основне меню (Навігація) -->
+        <div id="menu" style="text-align: center;">
+            <button onclick="show('hero')">🛡️ Герой</button>
+            <button onclick="show('castle')">🏰 Замок</button>
+            <button onclick="show('war')">⚔️ Війна</button>
+            <button onclick="show('train')">🏋️ Тренування</button>
+            <button onclick="show('inventory')">🎒 Сумка</button>
+            <button onclick="show('army')">🏹 Армія</button>
+            <button onclick="show('raid')">⚔️ Рейд</button>
+            <button onclick="show('friends')">🤝 Друзі</button>
+        </div>
+
+        <!-- Сюди завантажується контент вибраної вкладки -->
+        <div id="content"></div>
+
+        <!-- Нижнє сервісне меню -->
+        <div id="bottomMenu">
+            <button onclick="show('rating')">🏆 Рейтинг</button>
+            <button onclick="show('shop')">💎 Магазин</button>
+            <button onclick="show('chat')">💬 Чат</button>
+            <button id="mailBtn" onclick="show('mail')">📩 Пошта</button>
+            <button onclick="show('settings')">⚙️ Налаштування</button>
+            <button onclick="logout()">🚪 Вийти</button>
+        </div>
+    </div>
 </div>
 
-<div id="auth" style="display:none;"></div> 
-
-<div id="game" style="display:none;">
-
-    <div id="topbar"> ... </div>
-    <div id="expBar"> ... </div>
-
-    <!-- ДОДАЙ ЦЕЙ РЯДОК СЮДИ -->
-    <div id="battleLog" style="height:40px; color:#ffdf5d; text-align:center; font-style:italic; margin-bottom:10px;"></div>
-
-    <div id="menu">
-        <button onclick="show('hero')">🛡️ Герой</button>
-
-<div id="topbar">
-💰 <span id="gold"></span>
-💎 <span id="diamonds">0</span>
-⚔️ <span id="power"></span>
-⭐ <span id="level"></span>
-</div>
-
-<div id="expBar">
-<div id="expFill">0%</div>
-</div>
-
-<div id="menu">
-<button onclick="show('hero')">🛡️ Герой</button>
-<button onclick="show('castle')">🏰 Замок</button>
-<button onclick="show('war')">⚔️ Війна</button>
-<button onclick="show('train')">🏋️ Тренування</button>
-<button onclick="show('inventory')">🎒 Сумка</button>
-<button onclick="show('army')">🏹 Армія</button>
-<button onclick="show('raid')">⚔️ Рейд</button>
-<button onclick="show('friends')">🤝 Друзі</button>
-</div>
-
-<div id="content"></div>
-
-<div id="bottomMenu">
-<button onclick="show('rating')">🏆 Рейтинг</button>
-<button onclick="show('shop')">💎 Магазин</button>
-<button onclick="show('chat')">💬 Чат</button>
-<button id="mailBtn" onclick="show('mail')">📩 Пошта</button>
-<button onclick="show('settings')">⚙️ Налаштування</button>
-<button onclick="logout()">🚪 Вийти</button>
-</div>
-
-</div>
-
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-<script>
- const firebaseConfig = {
-    apiKey: "AIzaSyAfVxivb10ZTTNDYF-_UpaXEfxOCDGDWAQ",
-    authDomain: "imperiya-grifona.firebaseapp.com",
-    projectId: "imperiya-grifona",
-    storageBucket: "imperiya-grifona.appspot.com",
-    messagingSenderId: "952468135190",
-    appId: "1:952468135190:web:cf402029c50911a0f08437",
-    measurementId: "G-3QGPW7QK3F"
-  };
-
-firebase.initializeApp(firebaseConfig);
-
-const authFirebase = firebase.auth();
-const db = firebase.firestore();
-</script>
-
-<script src="auth.js"></script>
-<script src="game.js"></script>
-
+<!-- Підключення скриптів (залиш як було) -->
+...
 </body>
 </html>
