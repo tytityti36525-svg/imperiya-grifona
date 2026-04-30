@@ -37,12 +37,22 @@
 
         <!-- Лог останнього бою (сюди виводяться результати битви)[cite: 14, 15] -->
         <div id="battleLog"></div>
+        
+        <div id="altar-screen" class="screen" style="display:none;">
+    <h3>Вівтар Стародавніх</h3>
+    <p>Тут можна отримати благословення, що множить вашу силу.</p>
+    <div class="upgrade-item">
+        <p>Рівень магії: <span id="bless-level">0</span></p>
+        <button onclick="buyBlessing()">Покращити (500 💰)</button>
+    </div>
+</div>
 
         <!-- Верхнє навігаційне меню[cite: 15] -->
         <div id="menu">
             <button onclick="show('hero')">🛡️ Герой</button>
             <button onclick="show('castle')">🏰 Замок</button>
             <button onclick="show('war')">⚔️ Війна</button>
+            <button onclick="showScreen('altar-screen')">⛩️ Вівтар</button>
             <button onclick="show('train')">🏋️ Тренування</button>
             <button onclick="show('inventory')">🎒 Сумка</button>
             <button onclick="show('army')">🏹 Армія</button>
