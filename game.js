@@ -35,7 +35,8 @@ function defaultGame() {
         buildings: {
             barracks: 1,
             forge: 1,
-            academy: 1
+            academy: 1,
+            mine: 0
         },
         army: {
             swordsmen: 0,
@@ -76,6 +77,16 @@ async function startGame(uid) {
     gameData = data.game || defaultGame();
     // 🔥 ВЕРСІЯ ГРИ (міняєш — і всім скидає)
 const GAME_VERSION = 2;
+
+const now = Date.now();
+if (gameData.lastExit) {
+    const minutes = Math.floor((now - gameData.lastExit) / 60000);
+    const income = minutes * (gameData.buildings.mine * 5); // 5 золота за рівень копальні в хв
+    if (income > 0) {
+        gameData.gold += income;
+        alert(`Поки тебе не було, копальня принесла: ${income} 💰`);
+    }
+}
 
 if (!gameData.version || gameData.version < GAME_VERSION) {
     gameData = defaultGame();   // повний ресет
@@ -144,6 +155,8 @@ function fixOldSaves() {
     if (gameData.buildings.barracks === undefined) gameData.buildings.barracks = 1;
     if (gameData.buildings.forge === undefined) gameData.buildings.forge = 1;
     if (gameData.buildings.academy === undefined) gameData.buildings.academy = 1;
+    if (gameData.buildings.mine === undefined) gameData.buildings.mine = 0;
+    if (gameData.buildings.mine === undefined) gameData.buildings.mine = 0;
 
     if (!gameData.army || typeof gameData.army === "number") gameData.army = def.army;
     if (gameData.army.swordsmen === undefined) gameData.army.swordsmen = 0;
@@ -189,6 +202,7 @@ function armyHirePrice(type) {
 
 async function save() {
     if (!playerRef) return;
+    gameData.lastExit = Date.now();
 
     const snap = await playerRef.get();
     const old = snap.data() || {};
@@ -275,7 +289,8 @@ function buildingPrice(type) {
     const base = {
         barracks: 80,
         forge: 120,
-        academy: 150
+        academy: 150,
+        mine: 200
     };
 
     return base[type] * Math.pow(2, gameData.buildings[type] - 1);
@@ -490,6 +505,13 @@ function show(section) {
             Будівля розвитку героя<br>
             Ціна: ${buildingPrice("academy")} золота<br>
             <button onclick="upgradeBuilding('academy')">Покращити академію</button>
+
+            <img src="images/mine.png" class="building-img">
+            <b>Золота копальня:</b> ${gameData.buildings.mine || 0}<br>
+            Дає +${(gameData.buildings.mine || 0) * 5} золота на хвилину (офлайн)<br>
+            Ціна: ${buildingPrice("mine")} золота<br>
+            <button onclick="upgradeBuilding('mine')">Покращити копальню</button>
+            
         `;
     }
 
@@ -759,24 +781,23 @@ async function train(type) {
 }
 
 async function fight() {
+    const log = document.getElementById("battleLog");
     if (!currentEnemy) currentEnemy = generateEnemy();
 
     if (gameData.hero.attack >= currentEnemy.power) {
-    gameData.gold += currentEnemy.reward;
-    gameData.hero.exp += currentEnemy.exp;
+        gameData.gold += currentEnemy.reward;
+        gameData.hero.exp += currentEnemy.exp;
+        
+        const item = getItem();
+        if (item) gameData.inventory.push(item);
 
-    const item = getItem();
-    if (item) {
-        gameData.inventory.push(item);
+        // Замість alert пишемо в лог
+        log.innerText = `⚔️ Перемога над ${currentEnemy.name}! +${currentEnemy.reward} золота.`;
+    } else {
+        log.innerText = `💀 Поразка... ${currentEnemy.name} занадто сильний.`;
     }
 
-    alert("Перемога!");
-} else {
-    alert("Поразка. Прокачай героя або армію.");
-}
-
-gameData.enemyScale *= 1.02; // +2%
-
+    gameData.enemyScale *= 1.02;
     checkLevelUp();
     recalc();
     await save();
