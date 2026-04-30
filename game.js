@@ -258,10 +258,14 @@ function recalc() {
         atk += (gameData.equipmentPower.weapon || 0);
     }
 
-    // Записуємо фінальний результат в об'єкт гри
-    gameData.hero.attack = atk;
-    const blessingMultiplier = 1 + (gameData.blessings.strengthLevel * 0.10);
-    gameData.hero.attack = Math.floor(gameData.hero.attack * blessingMultiplier);
+   // Записуємо фінальний результат
+gameData.hero.attack = atk;
+
+// Додаємо захист: якщо blessings ще немає, ставимо 0
+const sLevel = (gameData.blessings && gameData.blessings.strengthLevel) ? gameData.blessings.strengthLevel : 0;
+const blessingMultiplier = 1 + (sLevel * 0.10);
+
+gameData.hero.attack = Math.floor(gameData.hero.attack * blessingMultiplier);
 }
 
 function updateUI() {
@@ -530,6 +534,21 @@ function show(section) {
             </div>
         `;
     }
+
+    if (section === "altar") {
+    const sLevel = (gameData.blessings && gameData.blessings.strengthLevel) ? gameData.blessings.strengthLevel : 0;
+    const cost = 500 + (sLevel * 500);
+
+    content.innerHTML = `
+        <h2>⛩️ Вівтар Стародавніх</h2>
+        <p>Благословення множить вашу загальну силу.</p>
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
+            <p>Рівень магії: <b>${sLevel}</b></p>
+            <p>Ефект: +${sLevel * 10}% до атаки</p>
+            <button onclick="buyBlessing()">Покращити за ${cost} 💰</button>
+        </div>
+    `;
+}
 
     if (section === "war") {
         currentEnemy = generateEnemy();
