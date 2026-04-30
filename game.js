@@ -510,7 +510,8 @@ if (section === "inventory") {
     if (section === "army") {
         content.innerHTML = `
             <h2>Армія</h2>
-            <div style="font-size:90px;">🛡️⚔️🧍‍♂️🏹🐎</div>
+            <div> <img src="images/army.png" style="width:120px;">
+            </div>
 
             ⚔️ Мечники: ${gameData.army.swordsmen}<br>
             +1 сила, ціна ${armyHirePrice("swordsmen")}<br>
