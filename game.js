@@ -43,18 +43,24 @@ function defaultGame() {
             archers: 0,
             knights: 0
         },
+
+       blessings: {
+            strengthLevel: 0, // рівень магічної сили
+        },
+        faith: 0, // <-- КОМА ТУТ ОБОВ'ЯЗКОВА
         
-        armyHired: {
-    swordsmen: 0,
-    archers: 0,
-    knights: 0
-},
+        armyHired: { // <-- ПЕРЕВІР ДВОКРАПКУ
+            swordsmen: 0,
+            archers: 0,
+            knights: 0
+        }, // <-- КОМА ТУТ
+
         equipped: {
-    helmet: null,
-    armor: null,
-    pants: null,
-    boots: null,
-    weapon: null
+            helmet: null,
+            armor: null,
+            pants: null,
+            boots: null,
+            weapon: null
 }, // ← ОЦЕ ДОДАЙ
 
 equipmentPower: {
@@ -254,6 +260,8 @@ function recalc() {
 
     // Записуємо фінальний результат в об'єкт гри
     gameData.hero.attack = atk;
+    const blessingMultiplier = 1 + (gameData.blessings.strengthLevel * 0.10);
+    gameData.hero.attack = Math.floor(gameData.hero.attack * blessingMultiplier);
 }
 
 function updateUI() {
@@ -1429,6 +1437,20 @@ function checkArmyStatus() {
         armyExpireTime = 0;
         alert("Час дії підкріплення закінчився.");
         recalc();
+    }
+}
+
+function buyBlessing() {
+    let cost = 500 + (gameData.blessings.strengthLevel * 500); // Ціна росте з кожним разом
+    if (gameData.gold >= cost) {
+        gameData.gold -= cost;
+        gameData.blessings.strengthLevel++;
+        recalc(); // Оновлюємо силу
+        saveGame(); // Зберігаємо в Firebase
+        updateUI(); // Оновлюємо текст на екрані
+        alert("Ви стали сильнішими!");
+    } else {
+        alert("Тобі потрібно більше золота!");
     }
 }
 
