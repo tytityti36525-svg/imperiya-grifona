@@ -466,44 +466,60 @@ function show(section) {
         `;
     }
 
-    if (section === "castle") {
+   if (section === "castle") {
         content.innerHTML = `
             <h2>Замок</h2>
             <img src="images/castle.png" class="castle-img">
-            Рівень замку: ${gameData.castleLevel}<br>
-            Ціна покращення: ${castlePrice()} золота<br>
+            <p>Рівень замку: ${gameData.castleLevel}<br>
+            Ціна покращення: ${castlePrice()} золота</p>
             ${
                 canUpgradeCastle()
                 ? `<button onclick="upgradeCastle()">Покращити замок</button>`
                 : `<p style="color:#ff7777;">Щоб покращити замок, прокачай усі будівлі до ${gameData.castleLevel} рівня.</p>`
             }
 
+            <hr>
             <h3>Будівлі</h3>
 
-            <img src="images/barracks.png" class="building-img">
-            <b>Казарма:</b> ${gameData.buildings.barracks}<br>
-            Відкриває лучників і лицарів<br>
-            Ціна: ${buildingPrice("barracks")} золота<br>
-            <button onclick="upgradeBuilding('barracks')">Покращити казарму</button><br><br>
+            <div class="building-container">
+                <img src="images/barracks.png" class="building-img">
+                <div>
+                    <b>Казарма:</b> ${gameData.buildings.barracks}<br>
+                    Відкриває лучників і лицарів<br>
+                    Ціна: ${buildingPrice("barracks")} золота<br>
+                    <button onclick="upgradeBuilding('barracks')">Покращити</button>
+                </div>
+            </div>
 
-            <img src="images/barracks.png" class="building-img">
-            <b>Кузня:</b> ${gameData.buildings.forge}<br>
-            Дає +2 сили за рівень<br>
-            Ціна: ${buildingPrice("forge")} золота<br>
-            <button onclick="upgradeBuilding('forge')">Покращити кузню</button><br><br>
+            <div class="building-container">
+                <img src="images/barracks.png" class="building-img">
+                <div>
+                    <b>Кузня:</b> ${gameData.buildings.forge}<br>
+                    Дає +2 сили за рівень<br>
+                    Ціна: ${buildingPrice("forge")} золота<br>
+                    <button onclick="upgradeBuilding('forge')">Покращити</button>
+                </div>
+            </div>
 
-            <img src="images/academy.png" class="building-img">
-            <b>Академія:</b> ${gameData.buildings.academy}<br>
-            Будівля розвитку героя<br>
-            Ціна: ${buildingPrice("academy")} золота<br>
-            <button onclick="upgradeBuilding('academy')">Покращити академію</button>
+            <div class="building-container">
+                <img src="images/academy.png" class="building-img">
+                <div>
+                    <b>Академія:</b> ${gameData.buildings.academy}<br>
+                    Будівля розвитку героя<br>
+                    Ціна: ${buildingPrice("academy")} золота<br>
+                    <button onclick="upgradeBuilding('academy')">Покращити</button>
+                </div>
+            </div>
 
-            <img src="images/mine.png" class="building-img">
-            <b>Золота копальня:</b> ${gameData.buildings.mine || 0}<br>
-            Дає +${(gameData.buildings.mine || 0) * 5} золота на хвилину (офлайн)<br>
-            Ціна: ${buildingPrice("mine")} золота<br>
-            <button onclick="upgradeBuilding('mine')">Покращити копальню</button>
-            
+            <div class="building-container">
+                <img src="images/mine.png" class="building-img">
+                <div>
+                    <b>Золота копальня:</b> ${gameData.buildings.mine || 0}<br>
+                    Дає +${(gameData.buildings.mine || 0) * 5} золота/хв<br>
+                    Ціна: ${buildingPrice("mine")} золота<br>
+                    <button onclick="upgradeBuilding('mine')">Покращити</button>
+                </div>
+            </div>
         `;
     }
 

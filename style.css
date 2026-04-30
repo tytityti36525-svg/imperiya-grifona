@@ -141,3 +141,30 @@ input {
     font-size: 55px;
     margin-bottom: 8px;
 }
+/* --- Виправлення розміщення будівель --- */
+
+/* Контейнер для кожної будівлі, щоб вони стояли в стовпчик */
+.building-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2); /* Легке виділення фону */
+    border-radius: 12px;
+}
+
+/* Універсальний стиль для всіх картинок будівель */
+.building-container img {
+    width: 140px;      /* Однаковий розмір для всіх */
+    height: auto;
+    display: block;
+    margin: 0 auto 10px auto;
+}
+
+/* Стиль для кнопок всередині будівель */
+.building-container button {
+    width: 80%;
+    max-width: 250px;
+}
