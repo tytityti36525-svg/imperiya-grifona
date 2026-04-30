@@ -15,6 +15,7 @@ function defaultGame() {
     return {
         version: 2,
         enemyScale: 1,
+        lastReward: 0,
         hero: {
             level: 1,
             exp: 0,
@@ -103,6 +104,8 @@ if (!gameData.version || gameData.version < GAME_VERSION) {
     updateUI();
     show("hero");
     watchMail();
+    dailyReward();
+    <p>🎁 Щоденна нагорода доступна раз на 24 години</p>
 }
 
 function fixOldSaves() {
@@ -1216,3 +1219,35 @@ window.openProfile = openProfile;
 window.openPrivateChat = openPrivateChat;
 window.sendPrivateMessage = sendPrivateMessage;
 window.loadMail = loadMail;
+
+async function dailyReward() {
+    const now = Date.now();
+
+    // 24 години
+    const cooldown = 24 * 60 * 60 * 1000;
+
+    if (now - gameData.lastReward < cooldown) {
+        return; // ще не час
+    }
+
+    // 🎁 нагороди
+    const goldReward = 200;
+    const diamondsReward = 2;
+
+    gameData.gold += goldReward;
+    gameData.diamonds += diamondsReward;
+
+    // шанс предмета
+    const item = getItem();
+    if (item) {
+        gameData.inventory.push(item);
+    }
+
+    gameData.lastReward = now;
+
+    alert(`🎁 Щоденна нагорода!\n+${goldReward} золота\n+${diamondsReward} алмазів`);
+
+    recalc();
+    await save();
+    updateUI();
+}
