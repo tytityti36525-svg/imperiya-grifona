@@ -13,6 +13,27 @@ let chatUnsubscribe = null;
 let potionExpireTime = 0;  // Час закінчення дії зілля сили
 let armyExpireTime = 0;    // Час закінчення дії підкріплення
 
+const artifactsList = {
+    "dragon_heart": {
+        name: "❤️ Серце Дракона",
+        description: "Відновлює 5% HP після кожної битви",
+        power: 50,
+        rarity: "legendary"
+    },
+    "golden_touch": {
+        name: "💰 Рука Мідаса",
+        description: "+25% золота за перемогу",
+        power: 30,
+        rarity: "epic"
+    },
+    "ancient_scroll": {
+        name: "📜 Древній Сувій",
+        description: "+15% до досвіду (XP)",
+        power: 20,
+        rarity: "rare"
+    }
+};
+
 function defaultGame() {
     return {
         version: 2,
@@ -257,6 +278,13 @@ function recalc() {
         atk += (gameData.equipmentPower.boots || 0);
         atk += (gameData.equipmentPower.weapon || 0);
     }
+    
+    if (gameData.artifacts && gameData.artifacts.length > 0) {
+        gameData.artifacts.forEach(artKey => {
+            const art = artifactsList[artKey];
+            if (art) atk += art.power; 
+        });
+    }
 
    // Записуємо фінальний результат
 gameData.hero.attack = atk;
@@ -459,6 +487,28 @@ function show(section) {
     if (section !== "chat" && chatUnsubscribe) {
         chatUnsubscribe();
         chatUnsubscribe = null;
+    }
+    
+    if (section === "artifacts") {
+    let artHTML = "<h2>🏺 Твої Артефакти</h2><div class='art-grid'>";
+    
+    if (gameData.artifacts.length === 0) {
+        artHTML += "<p>У вас ще немає древніх реліквій...</p>";
+    } else {
+        gameData.artifacts.forEach(artKey => {
+            const art = artifactsList[artKey];
+            artHTML += `
+                <div class="art-card ${art.rarity}">
+                    <h4>${art.name}</h4>
+                    <p>${art.description}</p>
+                    <small>Сила: +${art.power}</small>
+                </div>
+            `;
+        });
+    }
+    
+    artHTML += "</div>";
+    content.innerHTML = artHTML;
     }
 
     if (section === "hero") {
@@ -838,6 +888,28 @@ async function fight() {
     await save();
     updateUI();
     show("war");
+}
+
+function applyArtifactEffects(rewardData) {
+    if (!gameData.artifacts) return rewardData;
+
+    let bonusGold = rewardData.gold;
+    let bonusXP = rewardData.xp;
+
+    // Перевіряємо кожен артефакт у гравця
+    gameData.artifacts.forEach(artKey => {
+        if (artKey === "golden_touch") {
+            bonusGold = Math.floor(bonusGold * 1.25);
+        }
+        if (artKey === "ancient_scroll") {
+            bonusXP = Math.floor(bonusXP * 1.15);
+        }
+        if (artKey === "dragon_heart") {
+            gameData.hero.hp = Math.min(gameData.hero.maxHp, gameData.hero.hp + (gameData.hero.maxHp * 0.05));
+        }
+    });
+
+    return { gold: bonusGold, xp: bonusXP };
 }
 
 function checkLevelUp() {
