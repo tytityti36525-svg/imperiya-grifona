@@ -10,6 +10,8 @@ let playerId;
 let playerRef;
 let currentEnemy = null;
 let chatUnsubscribe = null;
+let potionExpireTime = 0;  // Час закінчення дії зілля сили
+let armyExpireTime = 0;    // Час закінчення дії підкріплення
 
 function defaultGame() {
     return {
@@ -105,6 +107,19 @@ if (!gameData.version || gameData.version < GAME_VERSION) {
     show("hero");
     watchMail();
     dailyReward();
+  
+    // Додай це в кінець функції startGame
+    setInterval(() => {
+        checkPotionStatus();
+        checkArmyStatus();
+        recalc();
+        updateUI();
+    }, 10000); // Перевірка кожні 10 секунд
+
+    setInterval(() => {
+        save();
+        console.log("Прогрес збережено автоматично");
+    }, 60000); // Авто-збереження щохвилини
 }
 
 function fixOldSaves() {
@@ -214,6 +229,15 @@ function recalc() {
     }
 
     gameData.hero.attack = atk;
+    let atk = 10;
+
+    // Додаємо бонус від зілля, якщо воно ще діє
+    if (potionExpireTime && Date.now() < potionExpireTime) {
+        atk += 25; 
+    }
+
+    atk += gameData.hero.strength * 2;
+    // ... (решта твого коду в recalc залишається без змін)
 }
 
 function updateUI() {
@@ -1267,18 +1291,35 @@ function watchMail() {
             }
         });
 }
+
 async function buyPotion() {
     if (gameData.diamonds < 3) return alert("Недостатньо алмазів");
 
-    gameData.diamonds -= 3;
-    gameData.hero.strength += 25;
+    gameData.diamonds -= 3;            // Витрачаємо алмази
+    gameData.hero.strength += 25;      // Додаємо силу герою
+    potionExpireTime = Date.now() + 60 * 60 * 1000; // 1 година
 
-    recalc();
-    await save();
-    updateUI();
-    show("shop");
+    recalc();                         // Перераховуємо статуси
+    await save();                     // Зберігаємо зміни
+    updateUI();                       // Оновлюємо інтерфейс
+    show("shop");                     // Показуємо магазин
 
-    alert("🧪 Зілля сили куплено! +50 сили");
+    alert("🧪 Зілля сили куплено! +50 сили на 1 годину");
+}
+
+async function buyArmy() {
+    if (gameData.diamonds < 4) return alert("Недостатньо алмазів");
+
+    gameData.diamonds -= 4;            // Витрачаємо алмази
+    gameData.army.swordsmen += 5;      // Додаємо солдатів в армію
+    armyExpireTime = Date.now() + 60 * 60 * 1000; // 1 година
+
+    recalc();                         // Перераховуємо статуси
+    await save();                     // Зберігаємо зміни
+    updateUI();                       // Оновлюємо інтерфейс
+    show("shop");                     // Показуємо магазин
+
+    alert("🪖 Підкріплення куплено! +5 солдатів на 1 годину");
 }
 
 async function buyXP() {
@@ -1332,6 +1373,24 @@ async function buyArmy() {
     show("shop");
 
     alert("🪖 Підкріплення куплено! +5 солдатів");
+}
+
+function checkPotionStatus() {
+    if (potionExpireTime && Date.now() > potionExpireTime) {
+        // Ми не просто віднімаємо 25, а обнуляємо дію, 
+        // щоб не піти в мінус, якщо зілля не було активоване правильно
+        potionExpireTime = 0;
+        alert("Час дії зілля сили закінчився.");
+        recalc(); 
+    }
+}
+
+function checkArmyStatus() {
+    if (armyExpireTime && Date.now() > armyExpireTime) {
+        armyExpireTime = 0;
+        alert("Час дії підкріплення закінчився.");
+        recalc();
+    }
 }
 
 window.openProfile = openProfile;
