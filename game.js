@@ -105,7 +105,6 @@ if (!gameData.version || gameData.version < GAME_VERSION) {
     show("hero");
     watchMail();
     dailyReward();
-    <p>🎁 Щоденна нагорода доступна раз на 24 години</p>
 }
 
 function fixOldSaves() {
