@@ -1,5 +1,5 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyAfVxivb10ZTTNDYF-_UpaXEfXOCDGDWAQ",
+  apiKey: "AIzaSyAfVxivb10ZTTNDYF-_UpaXEfxOCDGDWAQ",
   authDomain: "imperiya-grifona.firebaseapp.com",
   databaseURL: "https://imperiya-grifona-default-rtdb.firebaseio.com",
   projectId: "imperiya-grifona",
