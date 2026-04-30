@@ -847,22 +847,32 @@ async function startRaid(enemyPower, enemyArmy, reward) {
 
 async function loadRating() {
     const snap = await db.collection("players")
-        .orderBy("level", "desc")
+        .orderBy("power", "desc")
         .limit(50)
         .get();
 
     let html = `<h2>🏆 Рейтинг гравців</h2>`;
 
+    let place = 0;
+
     snap.forEach(doc => {
         const p = doc.data();
         if (!p.nick && !p.login) return;
 
+        place++;
+
+        let medal = `${place}.`;
+        if (place === 1) medal = "🥇";
+        if (place === 2) medal = "🥈";
+        if (place === 3) medal = "🥉";
+
         html += `
-            <div style="margin:10px;padding:10px;background:#2b1a10;border-radius:10px;">
-                <b>${p.nick || p.login}</b><br>
-                Рівень: ${p.level || 1}<br>
-                Сила: ${p.power || 10}<br>
+            <div style="margin:10px;padding:12px;background:#2b1a10;border-radius:10px;">
+                <b>${medal} ${p.nick || p.login}</b><br>
+                ⭐ Рівень: ${p.level || 1}<br>
+                ⚔️ Сила: ${p.power || 10}<br>
                 ${doc.id !== playerId ? `
+                    <button onclick="openProfile('${doc.id}')">👤 Профіль</button>
                     <button onclick="addFriend('${doc.id}', '${p.nick || p.login}')">🤝 Додати в друзі</button>
                 ` : `<span>Це ти</span>`}
             </div>
