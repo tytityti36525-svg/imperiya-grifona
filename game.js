@@ -383,11 +383,11 @@ function generateEnemy() {
         { name: "Злий солдат", icon: "🧟‍♂️", mult: 1 },
         { name: "Темний лицар", icon: "🧛‍♂️", mult: 1.25 },
         { name: "Ворожий командир", icon: "👹", mult: 1.5 },
-        { name: "Королівський кат", icon: "☠️", mult: 1.8 }
+        { name: "Королівський кат", icon: "☠️", mult: 1.6 }
     ];
 
     const enemy = enemies[Math.floor(Math.random() * enemies.length)];
-    const basePower = (10 + (gameData.hero.level - 1) * 5) * (gameData.enemyScale || 1);
+    const basePower = (5 + (gameData.hero.level - 1) * 2) * (gameData.enemyScale || 1);
     const random = 0.9 + Math.random() * 0.2;
 
     return {
