@@ -222,9 +222,10 @@ async function save() {
 }
 
 function recalc() {
+    // Базова атака
     let atk = 10;
 
-    // 1. Бонус від зілля (якщо діє)
+    // 1. Тимчасові бонуси (зілля) - додаємо тільки до змінної atk
     if (potionExpireTime && Date.now() < potionExpireTime) {
         atk += 25; 
     }
@@ -244,25 +245,16 @@ function recalc() {
 
     // 5. Спорядження
     if (gameData.equipmentPower) {
-        atk += gameData.equipmentPower.helmet || 0;
-        atk += gameData.equipmentPower.armor || 0;
-        atk += gameData.equipmentPower.pants || 0;
-        atk += gameData.equipmentPower.boots || 0;
-        atk += gameData.equipmentPower.weapon || 0;
+        atk += (gameData.equipmentPower.helmet || 0);
+        atk += (gameData.equipmentPower.armor || 0);
+        atk += (gameData.equipmentPower.pants || 0);
+        atk += (gameData.equipmentPower.boots || 0);
+        atk += (gameData.equipmentPower.weapon || 0);
     }
 
+    // Записуємо фінальний результат в об'єкт гри
     gameData.hero.attack = atk;
 }
-
-    let atk = 10;
-
-    // Додаємо бонус від зілля, якщо воно ще діє
-    if (potionExpireTime && Date.now() < potionExpireTime) {
-        atk += 25; 
-    }
-
-    atk += gameData.hero.strength * 2;
-    // ... (решта твого коду в recalc залишається без змін)
 
 function updateUI() {
     gold.innerText = gameData.gold;
@@ -1326,16 +1318,16 @@ function watchMail() {
 async function buyPotion() {
     if (gameData.diamonds < 3) return alert("Недостатньо алмазів");
 
-    gameData.diamonds -= 3;            // Витрачаємо алмази
-    gameData.hero.strength += 25;      // Додаємо силу герою
-    potionExpireTime = Date.now() + 60 * 60 * 1000; // 1 година
+    gameData.diamonds -= 3;
+    // Встановлюємо лише час дії, recalc() сам додасть +25 сили, поки час не вийшов
+    potionExpireTime = Date.now() + 60 * 60 * 1000; 
 
-    recalc();                         // Перераховуємо статуси
-    await save();                     // Зберігаємо зміни
-    updateUI();                       // Оновлюємо інтерфейс
-    show("shop");                     // Показуємо магазин
+    recalc();
+    await save();
+    updateUI();
+    show("shop");
 
-    alert("🧪 Зілля сили куплено! +50 сили на 1 годину");
+    alert("🧪 Зілля сили активовано! +25 до атаки на 1 годину.");
 }
 
 async function buyArmy() {

@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<title>Імперія Грифона</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Імперія Грифона</title>
+    <link rel="stylesheet" href="style_4.css">
 </head>
 <body>
 
 <div id="app">
-    <!-- Головне меню -->
+    <!-- Головне меню: показується лише коли користувач не увійшов[cite: 13, 15] -->
     <div id="mainMenu">
         <h1>🦅 Імперія Грифона</h1>
         <button onclick="showLogin()">Увійти</button>
         <button onclick="showRegister()">Реєстрація</button>
     </div>
 
-    <!-- Вікно авторизації -->
+    <!-- Вікно авторизації: сюди JS вставляє форми входу/реєстрації[cite: 13] -->
     <div id="auth" style="display:none;"></div> 
 
-    <!-- Основна гра -->
+    <!-- Основний блок гри: показується після входу[cite: 14, 15] -->
     <div id="game" style="display:none;">
-        <!-- Панель ресурсів -->
+        
+        <!-- Панель ресурсів (Topbar)[cite: 15] -->
         <div id="topbar">
             <span>💰 <span id="gold">0</span></span>
             <span>💎 <span id="diamonds">0</span></span>
@@ -28,16 +30,16 @@
             <span>⭐ <span id="level">1</span></span>
         </div>
 
-        <!-- Смужка досвіду -->
+        <!-- Смужка досвіду[cite: 15] -->
         <div id="expBar">
-            <div id="expFill">0%</div>
+            <div id="expFill" style="width: 0%;">0%</div>
         </div>
 
-        <!-- Лог останнього бою -->
-        <div id="battleLog" style="height:40px; color:#ffdf5d; text-align:center; font-style:italic; margin: 10px 0;"></div>
+        <!-- Лог останнього бою (сюди виводяться результати битви)[cite: 14, 15] -->
+        <div id="battleLog"></div>
 
-        <!-- Основне меню (Навігація) -->
-        <div id="menu" style="text-align: center;">
+        <!-- Верхнє навігаційне меню[cite: 15] -->
+        <div id="menu">
             <button onclick="show('hero')">🛡️ Герой</button>
             <button onclick="show('castle')">🏰 Замок</button>
             <button onclick="show('war')">⚔️ Війна</button>
@@ -48,10 +50,10 @@
             <button onclick="show('friends')">🤝 Друзі</button>
         </div>
 
-        <!-- Сюди завантажується контент вибраної вкладки -->
+        <!-- Контентна область: сюди завантажуються всі вкладки через show()[cite: 14, 15] -->
         <div id="content"></div>
 
-        <!-- Нижнє сервісне меню -->
+        <!-- Нижнє сервісне меню[cite: 15] -->
         <div id="bottomMenu">
             <button onclick="show('rating')">🏆 Рейтинг</button>
             <button onclick="show('shop')">💎 Магазин</button>
@@ -63,7 +65,15 @@
     </div>
 </div>
 
-<!-- Підключення скриптів (залиш як було) -->
-...
+<!-- Firebase SDK (Обов'язково перед твоїми скриптами) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<!-- Твої скрипти в правильному порядку -->
+<script src="init.js"></script> <!-- Тут твій firebaseConfig -->
+<script src="game_4.js"></script> <!-- Логіка гри -->
+<script src="auth_4.js"></script> <!-- Логіка авторизації -->
+
 </body>
 </html>
