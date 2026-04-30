@@ -362,10 +362,10 @@ function generateRaidEnemy() {
     const basePower =
         Math.floor(Math.random() * (raid.maxPower - raid.minPower + 1)) + raid.minPower;
 
-    let scale = Math.pow(1.2, heroLevel - 1);
+    let scale = Math.pow(1.1, heroLevel - 1);
 
     if (heroLevel >= 15) {
-        scale *= Math.pow(1.35, heroLevel - 14);
+       scale *= Math.pow(1.15, heroLevel - 14);
     }
 
     return {
