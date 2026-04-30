@@ -9,13 +9,13 @@ const firebaseConfig = {
   measurementId: "G-3QGPW7QK3F"
 };
 
-// Ініціалізація Firebase для версії 8
+// Ініціалізація Firebase для версії 8 (яку ти використовуєш через CDN)
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// Створюємо змінні для auth.js та game.js
+// Створюємо глобальні змінні для роботи auth.js та game.js
 const authFirebase = firebase.auth();
 const db = firebase.firestore();
 
-console.log("Firebase успішно підключено!");
+console.log("Firebase успішно підключено з коректним API Key!");
