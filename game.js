@@ -595,26 +595,31 @@ if (section === "shop") {
     const r = getShopRarity();
     const price = shopPrice();
 
+    const shopItems = [
+        makeItem(r, "helmet"),
+        makeItem(r, "armor"),
+        makeItem(r, "pants"),
+        makeItem(r, "boots"),
+        makeItem(r, "weapon")
+    ];
+
     content.innerHTML = `
         <h2>💎 Магазин</h2>
-        Алмази: ${gameData.diamonds}<br>
-        Предмети магазину: <span style="color:${r.color}">${r.name}</span><br>
-        Ціна за предмет: ${price} 💎<br><br>
+        <p>Твої алмази: <b>${gameData.diamonds}</b> 💎</p>
+        <p>Рідкість товарів: <span style="color:${r.color}">${r.name}</span></p>
+        <p>Ціна за предмет: <b>${price}</b> 💎</p>
 
-        <div style="font-size:55px;">🪖</div>
-        <button onclick="buyShopItem('helmet')">Купити шолом</button><br><br>
-
-        <div style="font-size:55px;">🛡️</div>
-        <button onclick="buyShopItem('armor')">Купити броню</button><br><br>
-
-        <div style="font-size:55px;">👖</div>
-        <button onclick="buyShopItem('pants')">Купити штани</button><br><br>
-
-        <div style="font-size:55px;">👢</div>
-        <button onclick="buyShopItem('boots')">Купити чоботи</button><br><br>
-
-        <div style="font-size:55px;">⚔️</div>
-        <button onclick="buyShopItem('weapon')">Купити меч</button>
+        <div class="shop-grid">
+            ${shopItems.map(item => `
+                <div class="shop-card">
+                    <div class="shop-icon">${item.icon}</div>
+                    <b style="color:${item.color}">${item.name}</b><br>
+                    ⚔️ +${item.power} сили<br>
+                    💎 ${price}<br><br>
+                    <button onclick="buyShopItem('${item.type}')">Купити</button>
+                </div>
+            `).join("")}
+        </div>
     `;
 }
 
