@@ -620,6 +620,44 @@ if (section === "shop") {
                 </div>
             `).join("")}
         </div>
+
+<h3>🔥 Спеціальні предмети</h3>
+
+<div class="shop-grid">
+
+    <div class="shop-card">
+        🧪<br>
+        <b>Зілля сили</b><br>
+        ⚔️ +50 сили<br>
+        💎 3<br><br>
+        <button onclick="buyPotion()">Купити</button>
+    </div>
+
+    <div class="shop-card">
+        ✨<br>
+        <b>Зілля досвіду</b><br>
+        ⭐ +100 XP<br>
+        💎 3<br><br>
+        <button onclick="buyXP()">Купити</button>
+    </div>
+
+    <div class="shop-card">
+        🎁<br>
+        <b>Елітний предмет</b><br>
+        🎲 випадковий лут<br>
+        💎 5<br><br>
+        <button onclick="buyElite()">Купити</button>
+    </div>
+
+    <div class="shop-card">
+        🪖<br>
+        <b>Підкріплення</b><br>
+        👥 +5 солдатів<br>
+        💎 4<br><br>
+        <button onclick="buyArmy()">Купити</button>
+    </div>
+
+    </div>
     `;
 }
 
@@ -1229,10 +1267,81 @@ function watchMail() {
             }
         });
 }
+async function buyPotion() {
+    if (gameData.diamonds < 3) return alert("Недостатньо алмазів");
+
+    gameData.diamonds -= 3;
+    gameData.hero.strength += 25;
+
+    recalc();
+    await save();
+    updateUI();
+    show("shop");
+
+    alert("🧪 Зілля сили куплено! +50 сили");
+}
+
+async function buyXP() {
+    if (gameData.diamonds < 3) return alert("Недостатньо алмазів");
+
+    gameData.diamonds -= 3;
+    gameData.hero.exp += 100;
+
+    checkLevelUp();
+    recalc();
+    await save();
+    updateUI();
+    show("shop");
+
+    alert("✨ Зілля досвіду куплено! +100 XP");
+}
+
+async function buyElite() {
+    if (gameData.diamonds < 5) return alert("Недостатньо алмазів");
+
+    gameData.diamonds -= 5;
+
+    const types = ["helmet", "armor", "pants", "boots", "weapon"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    const item = makeItem({
+        name: "Елітний",
+        color: "gold",
+        min: 10,
+        max: 18
+    }, type);
+
+    gameData.inventory.push(item);
+
+    await save();
+    updateUI();
+    show("shop");
+
+    alert("🎁 Елітний предмет додано в сумку!");
+}
+
+async function buyArmy() {
+    if (gameData.diamonds < 4) return alert("Недостатньо алмазів");
+
+    gameData.diamonds -= 4;
+    gameData.army.swordsmen += 5;
+
+    recalc();
+    await save();
+    updateUI();
+    show("shop");
+
+    alert("🪖 Підкріплення куплено! +5 солдатів");
+}
+
 window.openProfile = openProfile;
 window.openPrivateChat = openPrivateChat;
 window.sendPrivateMessage = sendPrivateMessage;
 window.loadMail = loadMail;
+window.buyPotion = buyPotion;
+window.buyXP = buyXP;
+window.buyElite = buyElite;
+window.buyArmy = buyArmy;
 
 async function dailyReward() {
     const now = Date.now();
