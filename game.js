@@ -210,16 +210,25 @@ async function save() {
 function recalc() {
     let atk = 10;
 
-    atk += gameData.hero.strength * 2;
-    atk += gameData.hero.endurance;
-    atk += gameData.hero.vitality;
+    // 1. Бонус від зілля (якщо діє)
+    if (potionExpireTime && Date.now() < potionExpireTime) {
+        atk += 25; 
+    }
 
-    atk += gameData.army.swordsmen * 1;
-    atk += gameData.army.archers * 2;
-    atk += gameData.army.knights * 5;
+    // 2. Стати героя
+    atk += (gameData.hero.strength || 0) * 2;
+    atk += (gameData.hero.endurance || 0);
+    atk += (gameData.hero.vitality || 0);
 
+    // 3. Армія
+    atk += (gameData.army.swordsmen || 0) * 1;
+    atk += (gameData.army.archers || 0) * 2;
+    atk += (gameData.army.knights || 0) * 5;
+
+    // 4. Будівлі (Кузня)
     atk += (gameData.buildings.forge - 1) * 2;
 
+    // 5. Спорядження
     if (gameData.equipmentPower) {
         atk += gameData.equipmentPower.helmet || 0;
         atk += gameData.equipmentPower.armor || 0;
@@ -229,6 +238,8 @@ function recalc() {
     }
 
     gameData.hero.attack = atk;
+}
+
     let atk = 10;
 
     // Додаємо бонус від зілля, якщо воно ще діє
@@ -238,7 +249,6 @@ function recalc() {
 
     atk += gameData.hero.strength * 2;
     // ... (решта твого коду в recalc залишається без змін)
-}
 
 function updateUI() {
     gold.innerText = gameData.gold;
