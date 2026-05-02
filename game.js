@@ -13,6 +13,11 @@ let chatUnsubscribe = null;
 let potionExpireTime = 0;  // Час закінчення дії зілля сили
 let armyExpireTime = 0;    // Час закінчення дії підкріплення
 
+const missionTypes = {
+    short: { name: "Розвідка", time: 60000, goldMin: 100, goldMax: 300 },
+    long: { name: "Великий похід", time: 3600000, goldMin: 2000, goldMax: 5000 }
+};
+
 const artifactsList = {
     "dragon_heart": {
         name: "❤️ Серце Дракона",
@@ -36,7 +41,7 @@ const artifactsList = {
 
 function defaultGame() {
     return {
-        version: 2,
+        version: 3, // Змінюємо на 3, щоб оновити дані у гравців
         enemyScale: 1,
         lastReward: 0,
         hero: {
@@ -48,10 +53,24 @@ function defaultGame() {
             vitality: 0,
             attack: 10,
             heroClass: "mage",
+            hp: 100,
+            maxHp: 100
         },
         gold: 500,
         diamonds: 5,
         inventory: [],
+        
+        // --- СИСТЕМА АРТЕФАКТІВ ---
+        artifacts: [], 
+
+        // --- СИСТЕМА ЕКСПЕДИЦІЙ ---
+        activeExpedition: {
+            endTime: 0,
+            type: null,
+            reward: 0,
+            isActive: false
+        },
+
         castleLevel: 1,
         buildings: {
             barracks: 1,
@@ -64,34 +83,66 @@ function defaultGame() {
             archers: 0,
             knights: 0
         },
-
-       blessings: {
-            strengthLevel: 0, // рівень магічної сили
+        blessings: {
+            strengthLevel: 0,
         },
-        faith: 0, // <-- КОМА ТУТ ОБОВ'ЯЗКОВА
-        
-        armyHired: { // <-- ПЕРЕВІР ДВОКРАПКУ
+        faith: 0,
+        armyHired: {
             swordsmen: 0,
             archers: 0,
             knights: 0
-        }, // <-- КОМА ТУТ
-
+        },
         equipped: {
             helmet: null,
             armor: null,
             pants: null,
             boots: null,
             weapon: null
-}, // ← ОЦЕ ДОДАЙ
-
-equipmentPower: {
-    helmet: 0,
-    armor: 0,
-    pants: 0,
-    boots: 0,
-    weapon: 0
-},
+        },
+        equipmentPower: {
+            helmet: 0,
+            armor: 0,
+            pants: 0,
+            boots: 0,
+            weapon: 0
+        }
     };
+}
+
+function startExpedition(type) {
+    // Перевірка, чи загін вже не в дорозі
+    if (gameData.activeExpedition && gameData.activeExpedition.isActive) {
+        alert("Загін уже в дорозі!");
+        return;
+    }
+
+    const mission = missionTypes[type]; // Беремо дані зі списку, який ти додав раніше
+    gameData.activeExpedition = {
+        endTime: Date.now() + mission.time,
+        type: type,
+        reward: Math.floor(Math.random() * (mission.goldMax - mission.goldMin + 1)) + mission.goldMin,
+        isActive: true
+    };
+
+    save(); // Зберігаємо прогрес у Firebase або LocalStorage
+    show('expeditions'); // Оновлюємо екран
+    alert(`Експедиція "${mission.name}" розпочалася!`);
+}
+
+// Функція отримання нагороди
+function claimExpeditionReward() {
+    if (Date.now() >= gameData.activeExpedition.endTime) {
+        const reward = gameData.activeExpedition.reward;
+        gameData.gold += reward;
+        gameData.activeExpedition.isActive = false;
+        
+        save();
+        updateUI();
+        show('expeditions');
+        alert(`Загін повернувся! Ви отримали ${reward} 💰`);
+    } else {
+        alert("Місія ще не завершена!");
+    }
 }
 
 async function startGame(uid) {
@@ -675,6 +726,37 @@ if (section === "inventory") {
             Загальна сила армії: ${armyPower()}
         `;
     }
+
+    if (section === 'expeditions') {
+    const exp = gameData.activeExpedition;
+    const now = Date.now();
+    let contentHTML = `<h2>🧭 Експедиції</h2>`;
+
+    if (!exp || !exp.isActive) {
+        contentHTML += `
+            <p>Ваші війська готові до нових завоювань.</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="startExpedition('short')">Розвідка (1 хв)</button>
+                <button onclick="startExpedition('long')">Похід (1 год)</button>
+            </div>
+        `;
+    } else if (now < exp.endTime) {
+        let secLeft = Math.ceil((exp.endTime - now) / 1000);
+        contentHTML += `
+            <p>Повернення загону через: <b id="timer">${secLeft}</b> сек.</p>
+            <p>Очікувана нагорода: ${exp.reward} 💰</p>
+        `;
+        // Авто-оновлення таймера кожну секунду
+        setTimeout(() => show('expeditions'), 1000);
+    } else {
+        contentHTML += `
+            <p style="color: lime;">Війська повернулися з трофеями!</p>
+            <button onclick="claimExpeditionReward()">Забрати нагороду: ${exp.reward} 💰</button>
+        `;
+    }
+
+    content.innerHTML = contentHTML;
+}
 
     if (section === "raid") {
         const raid = generateRaidEnemy();
@@ -1553,6 +1635,8 @@ window.buyPotion = buyPotion;
 window.buyXP = buyXP;
 window.buyElite = buyElite;
 window.buyArmy = buyArmy;
+window.startExpedition = startExpedition;
+window.claimExpeditionReward = claimExpeditionReward;
 
 async function dailyReward() {
     const now = Date.now();
