@@ -356,7 +356,21 @@ function updateUI() {
     let percent = Math.floor((gameData.hero.exp / gameData.hero.expMax) * 100);
     expFill.style.width = percent + "%";
     expFill.innerText = percent + "%";
+
+    if (expStatus && exp && exp.isActive) {
+        const now = Date.now();
+        if (now >= exp.endTime) {
+            expStatus.innerHTML = "✅ Загін повернувся! <button onclick='show(\"expeditions\")'>Забрати</button>";
+        } else {
+            const left = Math.ceil((exp.endTime - now) / 1000);
+            expStatus.innerHTML = `🧭 Експедиція: ${left}с`;
+        }
+    } else if (expStatus) {
+        expStatus.innerHTML = "🧭 Загін відпочиває";
+    }
 }
+
+setInterval(updateUI, 1000);
 
 function castlePrice() {
     return 100 * Math.pow(2, gameData.castleLevel - 1);
