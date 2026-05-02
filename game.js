@@ -300,28 +300,34 @@ async function save() {
 }
 
 function recalc() {
-    // Базова атака
+    // 1. Базова атака
     let atk = 10;
 
-    // 1. Тимчасові бонуси (зілля) - додаємо тільки до змінної atk
-    if (potionExpireTime && Date.now() < potionExpireTime) {
+    // 2. Тимчасові бонуси (зілля)
+    if (typeof potionExpireTime !== 'undefined' && Date.now() < potionExpireTime) {
         atk += 25; 
     }
 
-    // 2. Стати героя
-    atk += (gameData.hero.strength || 0) * 2;
-    atk += (gameData.hero.endurance || 0);
-    atk += (gameData.hero.vitality || 0);
+    // 3. Характеристики героя
+    if (gameData.hero) {
+        atk += (gameData.hero.strength || 0) * 2;
+        atk += (gameData.hero.endurance || 0);
+        atk += (gameData.hero.vitality || 0);
+    }
 
-    // 3. Армія
-    atk += (gameData.army.swordsmen || 0) * 1;
-    atk += (gameData.army.archers || 0) * 2;
-    atk += (gameData.army.knights || 0) * 5;
+    // 4. Армія
+    if (gameData.army) {
+        atk += (gameData.army.swordsmen || 0) * 1;
+        atk += (gameData.army.archers || 0) * 2;
+        atk += (gameData.army.knights || 0) * 5;
+    }
 
-    // 4. Будівлі (Кузня)
-    atk += (gameData.buildings.forge - 1) * 2;
+    // 5. Будівлі (Кузня)
+    if (gameData.buildings && gameData.buildings.forge) {
+        atk += (gameData.buildings.forge - 1) * 2;
+    }
 
-    // 5. Спорядження
+    // 6. Спорядження
     if (gameData.equipmentPower) {
         atk += (gameData.equipmentPower.helmet || 0);
         atk += (gameData.equipmentPower.armor || 0);
@@ -329,22 +335,24 @@ function recalc() {
         atk += (gameData.equipmentPower.boots || 0);
         atk += (gameData.equipmentPower.weapon || 0);
     }
-    
+
+    // 7. Артефакти
     if (gameData.artifacts && gameData.artifacts.length > 0) {
         gameData.artifacts.forEach(artKey => {
             const art = artifactsList[artKey];
-            if (art) atk += art.power; 
+            if (art && art.power) {
+                atk += art.power; 
+            }
         });
     }
 
-   // Записуємо фінальний результат
-gameData.hero.attack = atk;
+    // 8. Множник Вівтаря (Благословення)
+    // Рахуємо рівень ОДИН РАЗ
+    const currentStrengthLevel = gameData.blessings?.strengthLevel || 0;
+    const totalMultiplier = 1 + (currentStrengthLevel * 0.15);
 
-// Додаємо захист: якщо blessings ще немає, ставимо 0
-const sLevel = (gameData.blessings && gameData.blessings.strengthLevel) ? gameData.blessings.strengthLevel : 0;
-const blessingMultiplier = 1 + (sLevel * 0.10);
-
-gameData.hero.attack = Math.floor(gameData.hero.attack * blessingMultiplier);
+    // 9. Фінальний розрахунок
+    gameData.hero.attack = Math.floor(atk * totalMultiplier);
 }
 
 function updateUI() {
@@ -1508,6 +1516,56 @@ async function loadMail() {
     content.innerHTML = html;
 }
 
+function buyArtifact(artKey) {
+    const artifact = artifactsList[artKey]; // Беремо дані з твого списку[cite: 3]
+    const cost = 1000; // Можеш додати ціну в artifactsList для кожного окремо
+
+    if (gameData.gold >= cost) {
+        gameData.gold -= cost;
+        gameData.artifacts.push(artKey); // Додаємо в інвентар
+        
+        recalc(); // Перераховуємо силу з урахуванням нового артефакту
+        updateUI(); // Оновлюємо цифри на екрані
+        saveToFirebase(); // Зберігаємо в хмару[cite: 4]
+        alert(`Ви придбали ${artifact.name}!`);
+    } else {
+        alert("Недостатньо золота!");
+    }
+}
+
+function showInventory() {
+    let html = "<h2>🎒 Твої артефакти</h2><div class='shop-grid'>";
+    
+    // Перевіряємо, чи є масив артефактів і чи він не порожній
+    if (!gameData.artifacts || gameData.artifacts.length === 0) {
+        html += "<p>У вас ще немає артефактів.</p>";
+    } else {
+        gameData.artifacts.forEach(artKey => {
+            const art = artifactsList[artKey]; // Беремо дані зі списку
+            
+            // Якщо артефакт існує в базі, додаємо його в HTML
+            if (art) {
+                html += `
+                    <div class="shop-card">
+                        <span class="shop-icon">📦</span>
+                        <h3>${art.name}</h3>
+                        <p>${art.description}</p>
+                        <small>Сила: +${art.power}</small>
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    html += "</div>";
+    
+    // Виводимо все на екран
+    const contentElement = document.getElementById("content");
+    if (contentElement) {
+        contentElement.innerHTML = html;
+    }
+}
+
 function watchMail() {
     db.collectionGroup("messages")
         .where("to", "==", playerId)
@@ -1624,6 +1682,23 @@ function checkArmyStatus() {
         armyExpireTime = 0;
         alert("Час дії підкріплення закінчився.");
         recalc();
+    }
+}
+
+function buyBlessing() {
+    let cost = 500 + ((gameData.blessings?.strengthLevel || 0) * 1000); 
+
+    if (gameData.gold >= cost) {
+        gameData.gold -= cost;
+        if (!gameData.blessings) gameData.blessings = { strengthLevel: 0 };
+        gameData.blessings.strengthLevel++;
+        
+        recalc(); // Оновлюємо силу[cite: 1]
+        updateUI(); // Оновлюємо цифри на екрані
+        saveToFirebase(); // Зберігаємо прогрес
+        show('altar'); // Оновлюємо вигляд вкладки
+    } else {
+        alert("Недостатньо золота!");
     }
 }
 

@@ -3,103 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Імперія Грифона</title>
+    <title>🦅 Імперія Грифона</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="app">
-    <!-- Головне меню: показується лише коли користувач не увійшов[cite: 13, 15] -->
+    <!-- Головне меню авторизації -->
     <div id="mainMenu">
         <h1>🦅 Імперія Грифона</h1>
         <button onclick="showLogin()">Увійти</button>
         <button onclick="showRegister()">Реєстрація</button>
     </div>
 
-    <!-- Вікно авторизації: сюди JS вставляє форми входу/реєстрації[cite: 13] -->
     <div id="auth" style="display:none;"></div> 
 
-    <!-- Основний блок гри: показується після входу[cite: 14, 15] -->
+    <!-- Основний інтерфейс гри -->
     <div id="game" style="display:none;">
         
-        <!-- Панель ресурсів (Topbar)[cite: 15] -->
+        <!-- Панель ресурсів -->
         <div id="topbar">
-            <span>💰 <span id="gold">0</span></span>
-            <span>💎 <span id="diamonds">0</span></span>
-            <span>⚔️ <span id="power">0</span></span>
-            <span>⭐ <span id="level">1</span></span>
+            <div class="res">💰 <span id="gold">0</span></div>
+            <div class="res">💎 <span id="diamonds">0</span></div>
+            <div class="res">⚔️ <span id="power">0</span></div>
+            <div class="res">⭐ <span id="level">1</span></div>
         </div>
 
-
-
-        <!-- Смужка досвіду[cite: 15] -->
-        <div id="expBar">
-            <div id="expFill" style="width: 0%;">0%</div>
+        <!-- Прогрес та статуси -->
+        <div id="status-container">
+            <div id="expBar"><div id="expFill">0%</div></div>
+            <div id="exp-status-bar">🧭 Загін відпочиває</div>
+            <div id="potion-status-bar"></div>
         </div>
 
-        <!-- Лог останнього бою (сюди виводяться результати битви)[cite: 14, 15] -->
+        <!-- Ігрове логування -->
         <div id="battleLog"></div>
-        
-        <div id="altar-screen" class="screen" style="display:none;">
-    <h3>Вівтар Стародавніх</h3>
-    <p>Тут можна отримати благословення, що множить вашу силу.</p>
-    <div class="upgrade-item">
-        <p>Рівень магії: <span id="bless-level">0</span></p>
-        <button onclick="buyBlessing()">Покращити (500 💰)</button>
-    </div>
-</div>
 
-<div id="exp-status-bar" style="
-    background: rgba(0, 0, 0, 0.6); 
-    color: white; 
-    padding: 8px; 
-    margin: 10px 0; 
-    border-radius: 8px; 
-    text-align: center; 
-    font-family: sans-serif;
-    border: 1px solid #444;
-">
-    🧭 Загін відпочиває
-</div>
+        <!-- Оновлена навігація по категоріях -->
+        <nav class="game-nav">
+            <div class="nav-group">
+                <small>ВІЙСЬКО</small>
+                <div class="buttons">
+                    <button onclick="show('war')">⚔️ Війна</button>
+                    <button onclick="show('raid')">👹 Рейд</button>
+                    <button onclick="show('army')">🏹 Армія</button>
+                </div>
+            </div>
+            <div class="nav-group">
+                <small>ГЕРОЙ ТА РОЗВИТОК</small>
+                <div class="buttons">
+                    <button onclick="show('hero')">👤 Герой</button>
+                    <button onclick="show('altar')">⛩️ Вівтар</button>
+                    <button onclick="show('train')">🏋️ Зал</button>
+                    <button onclick="show('castle')">🏰 Замок</button>
+                </div>
+            </div>
+            <div class="nav-group">
+                <small>СВІТ ТА МЕНЕДЖМЕНТ</small>
+                <div class="buttons">
+                    <button onclick="show('inventory')">🎒 Сумка</button>
+                    <button onclick="show('expeditions')">🧭 Походи</button>
+                    <button onclick="show('shop')">💎 Крамниця</button>
+                    <button onclick="show('friends')">🤝 Друзі</button>
+                    <button onclick="show('chat')">💬 Чат</button>
+                    <button id="mailBtn" onclick="show('mail')">📩 Пошта</button>
+                </div>
+            </div>
+        </nav>
 
-        <!-- Верхнє навігаційне меню[cite: 15] -->
-        <div id="menu">
-            <button onclick="show('hero')">🛡️ Герой</button>
-            <button onclick="show('castle')">🏰 Замок</button>
-            <button onclick="show('war')">⚔️ Війна</button>
-            <button onclick="show('altar')">⛩️ Вівтар</button>
-            <button onclick="show('train')">🏋️ Тренування</button>
-            <button onclick="show('inventory')">🎒 Сумка</button>
-            <button onclick="show('army')">🏹 Армія</button>
-            <button onclick="show('raid')">⚔️ Рейд</button>
-            <button onclick="show('friends')">🤝 Друзі</button>
-        </div>
-
-        <!-- Контентна область: сюди завантажуються всі вкладки через show()[cite: 14, 15] -->
+        <!-- Область відображення контенту вкладки -->
         <div id="content"></div>
 
-        <!-- Нижнє сервісне меню[cite: 15] -->
-        <div id="bottomMenu">
-            <button onclick="show('rating')">🏆 Рейтинг</button>
-            <button onclick="show('shop')">💎 Магазин</button>
-            <button onclick="show('expeditions')">🧭 Експедиції</button>
-            <button onclick="show('chat')">💬 Чат</button>
-            <button id="mailBtn" onclick="show('mail')">📩 Пошта</button>
-            <button onclick="show('settings')">⚙️ Налаштування</button>
-            <button onclick="logout()">🚪 Вийти</button>
+        <!-- Нижнє сервісне меню -->
+        <div id="footer-menu">
+            <button onclick="show('rating')">🏆 Топ</button>
+            <button onclick="show('settings')">⚙️</button>
+            <button onclick="logout()" class="btn-exit">🚪 Вийти</button>
         </div>
     </div>
 </div>
 
-<!-- Firebase SDK (Обов'язково перед твоїми скриптами) -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<!-- Твої скрипти в правильному порядку -->
-<script src="init.js"></script> <!-- Тут твій firebaseConfig -->
-<script src="game.js"></script> <!-- Логіка гри -->
-<script src="auth.js"></script> <!-- Логіка авторизації -->
+<!-- Скрипти гри -->
+<script src="init.js"></script> 
+<script src="game.js"></script> 
+<script src="auth.js"></script>
 
 </body>
 </html>
